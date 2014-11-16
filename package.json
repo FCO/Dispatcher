@@ -14,5 +14,9 @@
   "devDependencies": {
     "mocha": "^2.0.1",
     "should": "^4.3.0"
+  },
+  "dependencies": {
+    "http": "0.0.0",
+    "uri-templates": "^0.1.5"
   }
 }
