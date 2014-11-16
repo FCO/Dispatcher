@@ -16,6 +16,10 @@ r
 	.newRoute()
 		.method("GET")
 		.uri("/ble")
+	.newRoute()
+		.method("GET")
+		.uri("/template/{number}{?filter}")
+		.render("test.tmpl", {data1: "bla", data2: "ble"})
 ;
 console.log(r);
 

@@ -1,4 +1,5 @@
 var uriTemplate = require("uri-templates");
+var Template = require("template");
 
 var _match_order = [
 	"uri",
@@ -7,9 +8,15 @@ var _match_order = [
 
 var Router = function() {
 	this.routes = []
+	this.template = new Template();
+	this.importedTemplates = false;
 }
 
 Router.prototype = {
+	importTemplates:	function() {
+		this.template.pages("templates/*.tmpl");
+		this.importedTemplates = true;
+	},
 	firstRoute:	function() {
 		var new_route = new Router.Route(this);
 		this.routes.unshift(new_route);
@@ -40,7 +47,9 @@ Router.prototype = {
 			route = new Router.PreparedRoute(new Router.Route().uri("").handler(Router.notFoundHandler));
 		}
 		//console.log(route.toString());
-		return route.handle(request, response);
+		route.handle(request, response);
+		route.render(request, response);
+		return;
 	},
 	_prepare_routes:	function(routes) {
 		var prepared = [];
@@ -104,6 +113,16 @@ Router.PreparedRoute.prototype = {
 				handler.call(this, request, response)
 			}.bind(this));
 	},
+	render:		function(request, response) {
+		//console.log(request.method + " " + request.url);
+		var renders = this.route._render;
+		if(typeof renders == typeof function(){})
+			renders = [renders];
+		if(typeof renders == typeof [])
+			renders.forEach(function(renders){
+				renders.call(this, request, response)
+			}.bind(this));
+	},
 };
 
 Router.Route = function(router) {
@@ -130,6 +149,29 @@ Router.Route.prototype = {
 		//console.log("custom handler");
 		response.writeHead(200, {'Content-Type': 'text/plain'});
 		response.end("DEFAULT HANDLER: " + this.route.toString());
+	},
+	render:		function(template, fixedData) {
+		if(typeof this._handler != typeof [])
+			this._handler = [];
+		if(!this.router.importedTemplates) {
+			this.router.importTemplates();
+		}
+		if(typeof this._render != typeof [])
+			this._render = [];
+		this._render.push(function(request, response){
+			var data = {};
+			for(var key in fixedData) {
+				data[key] = fixedData[key];
+			}
+			for(var key in this.stash) {
+				data[key] = this.stash[key];
+			}
+			this.router.template.render(template, data, function(err, html){
+				if(err) throw err;
+				response.writeHead(200, {'Content-Type': 'text/html'});
+				response.end(html);
+			});
+		});
 	},
 };
 
