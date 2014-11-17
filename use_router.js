@@ -21,7 +21,7 @@ r
 		.uri("/template/{number}{?filter}")
 		.render("test.tmpl", {data1: "bla", data2: "ble"})
 ;
-console.log(r);
+//console.log(r);
 
 //var m = r.choose({method: "GET", uri: "bla"});
 //console.log(m.toString());
