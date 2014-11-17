@@ -1,5 +1,4 @@
 var uriTemplate = require("uri-templates");
-var Template = require("template");
 
 var _match_order = [
 	"uri",
@@ -8,13 +7,12 @@ var _match_order = [
 
 var Router = function() {
 	this.routes = []
-	this.template = new Template();
 	this.importedTemplates = false;
 }
 
 Router.prototype = {
 	importTemplates:	function() {
-		this.template.pages("templates/*.tmpl");
+		Router.importTemplates.call(this);
 		this.importedTemplates = true;
 	},
 	firstRoute:	function() {
@@ -86,6 +84,16 @@ Router._match_uri	= function(request) {
 	}.bind(this));
 	return found;
 };
+
+Router.importTemplates = function() {
+	var Template = require("template");
+	this.template = new Template();
+	this.template.pages("templates/*.tmpl");
+};
+
+Router.render = function(template, data, cb) {
+	this.template.render(template, data, cb);
+}
 
 Router.prototype.newRoute = Router.prototype.route;
 
@@ -160,6 +168,7 @@ Router.Route.prototype = {
 		}
 		if(typeof this._render != typeof [])
 			this._render = [];
+
 		this._render.push(function(request, response){
 			var data = {};
 			for(var key in fixedData) {
@@ -168,7 +177,7 @@ Router.Route.prototype = {
 			for(var key in this.stash) {
 				data[key] = this.stash[key];
 			}
-			this.router.template.render(template, data, function(err, html){
+			Router.render.call(this.router, template, data, function(err, html){
 				if(err) throw err;
 				response.writeHead(200, {'Content-Type': 'text/html'});
 				response.end(html);
