@@ -109,8 +109,10 @@ Router.PreparedRoute.prototype = {
 		if(typeof handlers == typeof function(){})
 			handlers = [handlers];
 		if(typeof handlers == typeof [])
-			handlers.forEach(function(handler){
-				handler.call(this, request, response)
+			handlers.forEach(function loop(handler){
+				if(loop.stop) return;
+				var ret = handler.call(this, request, response)
+				if(ret === false) loop.stop = true;
 			}.bind(this));
 	},
 	render:		function(request, response) {

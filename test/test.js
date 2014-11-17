@@ -177,6 +177,24 @@ describe("Router.Route" , function(){
 			did_run.should.be.true;
 		});
 		it("uri", function(){
+			var did_after_run = false;
+			did_run = false;
+			router = new Router();
+			router
+				.newRoute()
+					.handler(function(){
+						did_run = true;
+						return false;
+					})
+					.handler(function(){
+						did_after_run = true;
+					})
+			;
+			runDispatcher({method: "XXX", url: "/ble"});
+			did_run.should.be.true;
+			did_after_run.should.be.false;
+		});
+		it("handler", function(){
 			did_run = false;
 			router = new Router();
 			router.newRoute().uri("/bla").handler(function(){
