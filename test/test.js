@@ -151,17 +151,60 @@ describe("Router.Route" , function(){
 			});
 		});
 	});
+	describe("functionalities" , function(){
+		var did_run, router;
+		function runDispatcher(request, response) {
+			var none = function(){};
+			router.dispatch(request || {}, response || {writeHead: none, end: none});
+		}
+
+		it("not found", function(){
+			router = new Router();
+			router.newRoute().uri("/tmpl/{num}{filter}").render("test.tmpl", {data1: "bla", data2: "ble"});
+			runDispatcher({method: "XXX", url: "/ble"}, {writeHead: function(){}, end: function(data){
+				data.should.be.equal("404 not found");
+			}});
+		});
+		it("method", function(){
+			did_run = false;
+			router = new Router();
+			router.newRoute().method("YYY").handler(function(){
+				did_run = true;
+			});
+			runDispatcher({method: "XXX", url: "/bla"});
+			did_run.should.be.false;
+			runDispatcher({method: "YYY", url: "/bla"});
+			did_run.should.be.true;
+		});
+		it("uri", function(){
+			did_run = false;
+			router = new Router();
+			router.newRoute().uri("/bla").handler(function(){
+				did_run = true;
+			});
+			runDispatcher({method: "XXX", url: "/ble"});
+			did_run.should.be.false;
+			runDispatcher({method: "XXX", url: "/bla"});
+			did_run.should.be.true;
+		});
+		it("render", function(){
+			did_run = false;
+			router = new Router();
+			router.newRoute().uri("/tmpl/{number}{?filter}").render("test.tmpl", {data1: "bla", data2: "ble"});
+			runDispatcher({method: "XXX", url: "/tmpl/123?filter=test"}, {writeHead: function(){}, end: function(data){
+				data.should.be.equal("<html>\n\t<body>\n\t\ttitle: <h1>bla ble</h1>\n\t\tnumber: 123 filter: test\n\t</body>\n</html>");
+			}});
+		});
+	});
 });
 
 describe("dispatch" , function(){
 	describe("change the default behavior" , function(){
 		var did_run, router;
-
 		function runDispatcher(request) {
 			var none = function(){};
 			router.dispatch(request || {}, {writeHead: none, end: none});
 		}
-
 		beforeEach("Create router", function(){
 			did_run = false;
 			router = new Router();
