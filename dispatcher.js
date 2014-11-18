@@ -5,23 +5,23 @@ var _match_order = [
 	"method",
 ];
 
-var Router = function() {
+var Dispatcher= function() {
 	this.routes = []
 	this.importedTemplates = false;
 }
 
-Router.prototype = {
+Dispatcher.prototype = {
 	importTemplates:	function() {
-		Router.importTemplates.call(this);
+		Dispatcher.importTemplates.call(this);
 		this.importedTemplates = true;
 	},
 	firstRoute:	function() {
-		var new_route = new Router.Route(this);
+		var new_route = new Dispatcher.Route(this);
 		this.routes.unshift(new_route);
 		return new_route;
 	},
 	route:	function() {
-		var new_route = new Router.Route(this);
+		var new_route = new Dispatcher.Route(this);
 		this.routes.push(new_route);
 		return new_route;
 	},
@@ -42,7 +42,7 @@ Router.prototype = {
 		if(matches.length > 0) {
 			route =  matches[0];
 		} else {
-			route = new Router.PreparedRoute(new Router.Route().uri("").handler(Router.notFoundHandler));
+			route = new Dispatcher.PreparedRoute(new Dispatcher.Route().uri("").handler(Dispatcher.notFoundHandler));
 		}
 		//console.log(route.toString());
 		route.handle(request, response);
@@ -52,24 +52,24 @@ Router.prototype = {
 	_prepare_routes:	function(routes) {
 		var prepared = [];
 		routes.forEach(function(route){
-			this.push(new Router.PreparedRoute(route));
+			this.push(new Dispatcher.PreparedRoute(route));
 		}.bind(prepared));
 		return prepared;
 	},
 };
 
-Router.notFoundHandler = function(request, response) {
+Dispatcher.notFoundHandler = function(request, response) {
 	response.writeHead(404, {'Content-Type': 'text/plain'});
 	response.end("404 not found");
 };
 
-Router._match_method	= function(request) {
+Dispatcher._match_method	= function(request) {
 	//console.log(this.method + " == " + request.method);
 	if(this.method == null || this.method.length == 0) return true;
 	return this.method.indexOf(request.method) >= 0;
 };
 
-Router._match_uri	= function(request) {
+Dispatcher._match_uri	= function(request) {
 	//console.log(this.uri + " == " + request.url);
 	if(this.uri == null || this.uri.length == 0) return true;
 	var found = false;
@@ -85,17 +85,17 @@ Router._match_uri	= function(request) {
 	return found;
 };
 
-Router.importTemplates = function() {
+Dispatcher.importTemplates = function() {
 	var Template = require("template");
 	this.template = new Template();
 	this.template.pages("templates/*.tmpl");
 };
 
-Router.render = function(template, data, cb) {
+Dispatcher.render = function(template, data, cb) {
 	this.template.render(template, data, cb);
 }
 
-Router.defaultHandler = function(request, response) {
+Dispatcher.defaultHandler = function(request, response) {
 	//console.log(request.method + " " + request.url);
 	var handlers = this.route._handler;
 	if(typeof handlers == typeof function(){})
@@ -108,24 +108,24 @@ Router.defaultHandler = function(request, response) {
 		}.bind(this));
 };
 
-Router.prototype.newRoute = Router.prototype.route;
+Dispatcher.prototype.newRoute = Dispatcher.prototype.route;
 
-Router.PreparedRoute = function(route) {
+Dispatcher.PreparedRoute = function(route) {
 	this.route	= route;
 	this.router	= route.router;
 	this.stash	= {};
 	this.params	= {};
 }
 
-Router.PreparedRoute.prototype = {
+Dispatcher.PreparedRoute.prototype = {
 	match:	function(attr, request) {
 		var hash	= this.route.toHash();
 		hash.stash	= this.stash;
 		hash.params	= this.params;
-		return Router["_match_" + attr].call(hash, request);
+		return Dispatcher["_match_" + attr].call(hash, request);
 	},
 	handle:		function(request, response) {
-		return Router.defaultHandler.call(this, request, response);
+		return Dispatcher.defaultHandler.call(this, request, response);
 	},
 	render:		function(request, response) {
 		//console.log(request.method + " " + request.url);
@@ -143,11 +143,11 @@ Router.PreparedRoute.prototype = {
 	},
 };
 
-Router.Route = function(router) {
+Dispatcher.Route = function(router) {
 	this.router = router;
 }
 
-Router.Route.prototype = {
+Dispatcher.Route.prototype = {
 	toString:	function() {
 		return this._method + " -> " + this._uri;
 	},
@@ -185,7 +185,7 @@ Router.Route.prototype = {
 			for(var key in this.stash) {
 				data[key] = this.stash[key];
 			}
-			Router.render.call(this.router, template, data, function(err, html){
+			Dispatcher.render.call(this.router, template, data, function(err, html){
 				if(err) throw err;
 				response.writeHead(200, {'Content-Type': 'text/html'});
 				response.end(html);
@@ -237,8 +237,8 @@ function _setSetter(name, value) {
 	};
 }
 
-_setSetter.call(Router.Route.prototype, "method");
-_setSetter.call(Router.Route.prototype, "uri");
-_setSetter.call(Router.Route.prototype, "handler");
+_setSetter.call(Dispatcher.Route.prototype, "method");
+_setSetter.call(Dispatcher.Route.prototype, "uri");
+_setSetter.call(Dispatcher.Route.prototype, "handler");
 
-module.exports = Router;
+module.exports = Dispatcher;

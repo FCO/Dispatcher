@@ -1,5 +1,5 @@
 var should = require("should");
-var Router = require("../Router.js");
+var Router = require("../dispatcher.js");
 
 describe("requires" , function(){
 	it("should have the right classes", function(){

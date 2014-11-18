@@ -1,8 +1,7 @@
-var Router = require("./Router.js");
+var Dispatcher = require("./dispatcher.js");
 
-router = new Router();
-var r = router;
-r
+router = new Dispatcher();
+router
 	.newRoute()
 		.method("GET")
 		.uri("/bla/{id}")
@@ -35,5 +34,5 @@ var http = require('http');
 
 http.createServer(function (req, res) {
 	this.dispatch(req, res);
-}.bind(r)).listen(8080, '127.0.0.1');
+}.bind(router)).listen(8080, '127.0.0.1');
 
