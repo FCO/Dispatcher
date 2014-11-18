@@ -95,6 +95,19 @@ Router.render = function(template, data, cb) {
 	this.template.render(template, data, cb);
 }
 
+Router.defaultHandler = function(request, response) {
+	//console.log(request.method + " " + request.url);
+	var handlers = this.route._handler;
+	if(typeof handlers == typeof function(){})
+		handlers = [handlers];
+	if(typeof handlers == typeof [])
+		handlers.forEach(function loop(handler){
+			if(loop.stop) return;
+			var ret = handler.call(this, request, response)
+			if(ret === false) loop.stop = true;
+		}.bind(this));
+};
+
 Router.prototype.newRoute = Router.prototype.route;
 
 Router.PreparedRoute = function(route) {
@@ -112,16 +125,7 @@ Router.PreparedRoute.prototype = {
 		return Router["_match_" + attr].call(hash, request);
 	},
 	handle:		function(request, response) {
-		//console.log(request.method + " " + request.url);
-		var handlers = this.route._handler;
-		if(typeof handlers == typeof function(){})
-			handlers = [handlers];
-		if(typeof handlers == typeof [])
-			handlers.forEach(function loop(handler){
-				if(loop.stop) return;
-				var ret = handler.call(this, request, response)
-				if(ret === false) loop.stop = true;
-			}.bind(this));
+		return Router.defaultHandler.call(this, request, response);
 	},
 	render:		function(request, response) {
 		//console.log(request.method + " " + request.url);
@@ -226,6 +230,8 @@ function _setSetter(name, value) {
 		var attr = "_" + name;
 		if(typeof this[attr] != typeof [])
 			this[attr] = [];
+		if(name == "handler" && typeof value == typeof "")
+			value = require(value);
 		this[attr].push(value);
 		return this;
 	};
