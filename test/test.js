@@ -213,6 +213,16 @@ describe("Router.Route" , function(){
 				data.should.be.equal("<html>\n\t<body>\n\t\ttitle: <h1>bla ble</h1>\n\t\tnumber: 123 filter: test\n\t</body>\n</html>");
 			}});
 		});
+		it("stash2json", function(){
+			did_run = false;
+			router = new Router();
+			router.newRoute().uri("/stash2json/{test}{?array*}").stash2json();
+			runDispatcher({method: "XXX", url: "/stash2json/bla?array=a&array=b&array=c"}, {writeHead: function(){}, end: function(data){
+				did_run = true;
+				data.should.be.equal("{\"test\":\"bla\",\"array\":[\"a\",\"b\",\"c\"]}");
+			}});
+			did_run.should.be.true;
+		});
 	});
 });
 

@@ -20,6 +20,11 @@ r
 		.method("GET")
 		.uri("/template/{number}{?filter}")
 		.render("test.tmpl", {data1: "bla", data2: "ble"})
+	.newRoute()
+		.method("GET")
+		.uri("/request")
+		.request("POST", "/bla", {key: "value"}, {from: "to"})
+		.stash2json()
 ;
 //console.log(r);
 

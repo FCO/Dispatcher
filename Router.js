@@ -133,6 +133,10 @@ Router.PreparedRoute.prototype = {
 				renders.call(this, request, response)
 			}.bind(this));
 	},
+	request: function(method, uri, data, mapper) {
+		console.log(method, uri, data, mapper);
+		throw "request not implemented yet";
+	},
 };
 
 Router.Route = function(router) {
@@ -183,6 +187,37 @@ Router.Route.prototype = {
 				response.end(html);
 			});
 		});
+		return this;
+	},
+	request:	function(method, uri, data, mapper) {
+		if(typeof this._handler != typeof [])
+			this._handler = [];
+		this._handler.push(function(request, result){
+			this.request(method, uri, data, mapper);
+		});
+		return this;
+	},
+	stash2json:	function(mapper) {
+		if(typeof this._handler != typeof [])
+			this._handler = [];
+		this._handler.push(function(request, result){
+			var data;
+			if(mapper == null) {
+				data = this.stash;
+			} else if(typeof mapper == typeof []) {
+				mapper.forEach(function(key){
+					data[key] = this.stash[key];
+				});
+			} else if(typeof mapper == typeof {}) {
+				for(var key in mapper) {
+					data[mapper[key]] = this.stash[key];
+				}
+			} else {
+				data = this.stash[mapper];
+			}
+			result.end(JSON.stringify(data));
+		});
+		return this;
 	},
 };
 
