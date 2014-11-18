@@ -205,6 +205,18 @@ describe("Router.Route" , function(){
 			runDispatcher({method: "XXX", url: "/bla"});
 			did_run.should.be.true;
 		});
+		it("handler require", function(){
+			router = new Router();
+			var did_run_obj = {run: false};
+			router.newRoute()
+				.handler(function(){
+					this.stash.did_run_obj = did_run_obj
+				})
+				.handler("./testHandler.js")
+			;
+			runDispatcher({method: "XXX", url: "/ble"});
+			did_run_obj.run.should.be.true;
+		});
 		it("render", function(){
 			did_run = false;
 			router = new Router();
