@@ -160,7 +160,7 @@ describe("Router.Route" , function(){
 
 		it("not found", function(){
 			router = new Router();
-			router.newRoute().uri("/tmpl/{num}{filter}").render("test.tmpl", {data1: "bla", data2: "ble"});
+			router.newRoute().uri("/bla");
 			runDispatcher({method: "XXX", url: "/ble"}, {writeHead: function(){}, end: function(data){
 				data.should.be.equal("404 not found");
 			}});
