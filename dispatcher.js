@@ -22,7 +22,11 @@ Dispatcher.prototype = {
 		var http = require('http');
 		
 		http.createServer(function (req, res) {
-			this.dispatch(req, res);
+			try {
+				this.dispatch(req, res);
+			} catch(err) {
+				Dispatcher.internalServerError(req, res);
+			}
 		}.bind(this)).listen(
 			port || this.port,
 			ip || this.ip
@@ -63,8 +67,7 @@ Dispatcher.prototype = {
 			route = new Dispatcher.PreparedRoute(new Dispatcher.Route().uri("").handler(Dispatcher.notFoundHandler));
 		}
 		//console.log(route.toString());
-		route.handle(request, response);
-		route.render(request, response);
+		route.exec(request, response);
 		return;
 	},
 	_prepare_routes:	function(routes) {
@@ -74,6 +77,11 @@ Dispatcher.prototype = {
 		}.bind(prepared));
 		return prepared;
 	},
+};
+
+Dispatcher.internalServerError = function(request, response) {
+	response.writeHead(500, {'Content-Type': 'text/plain'});
+	response.end("500 internal server error");
 };
 
 Dispatcher.notFoundHandler = function(request, response) {
@@ -113,19 +121,6 @@ Dispatcher.render = function(template, data, cb) {
 	this.template.render(template, data, cb);
 }
 
-Dispatcher.defaultHandler = function(request, response) {
-	//console.log(request.method + " " + request.url);
-	var handlers = this.route._handler;
-	if(typeof handlers == typeof function(){})
-		handlers = [handlers];
-	if(typeof handlers == typeof [])
-		handlers.forEach(function loop(handler){
-			if(loop.stop) return;
-			var ret = handler.call(this, request, response)
-			if(ret === false) loop.stop = true;
-		}.bind(this));
-};
-
 Dispatcher.prototype.newRoute = Dispatcher.prototype.route;
 
 Dispatcher.PreparedRoute = function(route) {
@@ -142,8 +137,21 @@ Dispatcher.PreparedRoute.prototype = {
 		hash.params	= this.params;
 		return Dispatcher["_match_" + attr].call(hash, request);
 	},
+	exec:		function(request, response, data) {
+		this.handle(request, response);
+		this.render(request, response);
+	},
 	handle:		function(request, response) {
-		return Dispatcher.defaultHandler.call(this, request, response);
+		//console.log(request.method + " " + request.url);
+		var handlers = this.route._handler;
+		if(typeof handlers == typeof function(){})
+			handlers = [handlers];
+		if(typeof handlers == typeof [])
+			handlers.forEach(function loop(handler){
+				if(loop.stop) return;
+				var ret = handler.call(this, request, response)
+				if(ret === false) loop.stop = true;
+			}.bind(this));
 	},
 	render:		function(request, response) {
 		//console.log(request.method + " " + request.url);
