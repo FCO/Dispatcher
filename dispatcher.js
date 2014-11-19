@@ -5,15 +5,20 @@ var _match_order = [
 	"method",
 ];
 
-var Dispatcher= function() {
-	this.routes = []
+var Dispatcher= function(port, ip) {
+	if(port != null)
+		this.port = port;
+	if(ip != null)
+		this.ip = ip;
+	this.routes = [];
+	this.namedRoutes = {};
 	this.importedTemplates = false;
 }
 
 Dispatcher.prototype = {
 	port:	8080,
 	ip:	'127.0.0.1',
-	start:	function(ip, port) {
+	start:	function(port, ip) {
 		var http = require('http');
 		
 		http.createServer(function (req, res) {
@@ -212,6 +217,11 @@ Dispatcher.Route.prototype = {
 		this._handler.push(function(request, result){
 			this.request(method, uri, data, mapper);
 		});
+		return this;
+	},
+	name:		function(name) {
+		this.name = name;
+		this.router.namedRoutes[name] = this;
 		return this;
 	},
 	stash2json:	function(mapper) {

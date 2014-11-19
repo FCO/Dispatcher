@@ -115,6 +115,11 @@ describe("Router.Route" , function(){
 				route.should.have.a.property("handler");
 				route.handler	.should.be.a.Function;
 			});
+			it("name()", function(){
+				var route = new Router().route();
+				route.should.have.a.property("name");
+				route.name	.should.be.a.Function;
+			});
 			it("should add one by one", function(){
 				var route = new Router().route();
 				route.method("XXX");
@@ -205,6 +210,16 @@ describe("Router.Route" , function(){
 			runDispatcher({method: "XXX", url: "/bla"});
 			did_run.should.be.true;
 		});
+		it("name", function(){
+			did_run = false;
+			router = new Router();
+			router.newRoute().name("test").handler(function(){
+				did_run = true;
+			});
+			router.namedRoutes.should.have.a.property("test");
+			runDispatcher({method: "XXX", url: "/bla"});
+			did_run.should.be.true;
+		});
 		it("handler require", function(){
 			router = new Router();
 			var did_run_obj = {run: false};
@@ -284,27 +299,3 @@ describe("dispatch" , function(){
 		});
 	});
 });
-
-/*
-router = new Router();
-var r = router;
-r
-	.newRoute()
-		.method("GET")
-		.uri("/bla/{id}")
-		.uri("/bli{?id}")
-		.handler(function(req, res){
-			console.log("custom handler");
-			res.writeHead(200, {'Content-Type': 'text/plain'});
-			res.write("ID: " + this.stash.id + "\n");
-			res.end("HANDLER: " + this.route.toString());
-		})
-	.newRoute()
-		.method("GET")
-		.uri("/ble")
-;
-
-http.createServer(function (req, res) {
-	this.dispatch(req, res);
-}.bind(r)).listen(8080, '127.0.0.1');
-*/
