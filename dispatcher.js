@@ -11,6 +11,19 @@ var Dispatcher= function() {
 }
 
 Dispatcher.prototype = {
+	port:	8080,
+	ip:	'127.0.0.1',
+	start:	function(ip, port) {
+		var http = require('http');
+		
+		http.createServer(function (req, res) {
+			this.dispatch(req, res);
+		}.bind(this)).listen(
+			port || this.port,
+			ip || this.ip
+		);
+		console.log("Connect at http://" + (ip || this.ip) + ":" + (port || this.port));
+	},
 	importTemplates:	function() {
 		Dispatcher.importTemplates.call(this);
 		this.importedTemplates = true;

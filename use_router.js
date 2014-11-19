@@ -1,7 +1,7 @@
 var Dispatcher = require("./dispatcher.js");
 
-router = new Dispatcher();
-router
+dispatcher = new Dispatcher();
+dispatcher
 	.newRoute()
 		.method("GET")
 		.uri("/bla/{id}")
@@ -26,9 +26,4 @@ router
 		.stash2json()
 ;
 
-var http = require('http');
-
-http.createServer(function (req, res) {
-	this.dispatch(req, res);
-}.bind(router)).listen(8080, '127.0.0.1');
-
+dispatcher.start();
