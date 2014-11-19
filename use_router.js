@@ -25,10 +25,6 @@ router
 		.request("POST", "/bla", {key: "value"}, {from: "to"})
 		.stash2json()
 ;
-//console.log(r);
-
-//var m = r.choose({method: "GET", uri: "bla"});
-//console.log(m.toString());
 
 var http = require('http');
 
