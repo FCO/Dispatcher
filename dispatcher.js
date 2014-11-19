@@ -6,14 +6,14 @@ var _match_order = [
 ];
 
 var Dispatcher= function(port, ip) {
-	if(port != null)
+	if(port !== undefined)
 		this.port = port;
-	if(ip != null)
+	if(ip !== undefined)
 		this.ip = ip;
 	this.routes = [];
 	this.namedRoutes = {};
 	this.importedTemplates = false;
-}
+};
 
 Dispatcher.prototype = {
 	port:	8080,
@@ -91,19 +91,20 @@ Dispatcher.notFoundHandler = function(request, response) {
 
 Dispatcher._match_method	= function(request) {
 	//console.log(this.method + " == " + request.method);
-	if(this.method == null || this.method.length == 0) return true;
+	if(this.method === undefined || this.method.length === 0) return true;
 	return this.method.indexOf(request.method) >= 0;
 };
 
 Dispatcher._match_uri	= function(request) {
 	//console.log(this.uri + " == " + request.url);
-	if(this.uri == null || this.uri.length == 0) return true;
+	if(this.uri === undefined || this.uri.length === 0) return true;
 	var found = false;
 	(this.uri || []).forEach(function(uri){
 		var data = uriTemplate(uri).fromUri(request.url);
-		if(data != null) {
+		if(data !== undefined) {
 			for(var key in data) {
-				this.params[key] = this.stash[key] = data[key];
+        			if(data.hasOwnProperty(key))
+					this.params[key] = this.stash[key] = data[key];
 			}
 			found = true;
 		}
@@ -119,7 +120,7 @@ Dispatcher.importTemplates = function() {
 
 Dispatcher.render = function(template, data, cb) {
 	this.template.render(template, data, cb);
-}
+};
 
 Dispatcher.prototype.newRoute = Dispatcher.prototype.route;
 
@@ -128,7 +129,7 @@ Dispatcher.PreparedRoute = function(route, data) {
 	this.router	= route.router;
 	this.stash	= data || {};
 	this.params	= {};
-}
+};
 
 Dispatcher.PreparedRoute.prototype = {
 	match:	function(attr, request) {
@@ -139,7 +140,7 @@ Dispatcher.PreparedRoute.prototype = {
 	},
 	exec:		function(request, response, data) {
 		var context;
-		if(data != null) {
+		if(data !== undefined) {
 			context = new Dispatcher.PreparedRoute(this.route, data);
 		} else {
 			context = this;
@@ -155,7 +156,7 @@ Dispatcher.PreparedRoute.prototype = {
 		if(typeof handlers == typeof [])
 			handlers.forEach(function loop(handler){
 				if(loop.stop) return;
-				var ret = handler.call(this, request, response)
+				var ret = handler.call(this, request, response);
 				if(ret === false) loop.stop = true;
 			}.bind(this));
 	},
@@ -166,7 +167,7 @@ Dispatcher.PreparedRoute.prototype = {
 			renders = [renders];
 		if(typeof renders == typeof [])
 			renders.forEach(function(renders){
-				renders.call(this, request, response)
+				renders.call(this, request, response);
 			}.bind(this));
 	},
 	request: function(method, uri, data, mapper) {
@@ -177,14 +178,14 @@ Dispatcher.PreparedRoute.prototype = {
 
 Dispatcher.Route = function(router) {
 	this.router = router;
-}
+};
 
 Dispatcher.Route.prototype = {
 	toString:	function() {
 		return this._method + " -> " + this._uri;
 	},
 	newRoute:	function() {
-		return this.router.newRoute()
+		return this.router.newRoute();
 	},
 	toHash:		function() {
 		var hash = {};
@@ -211,11 +212,13 @@ Dispatcher.Route.prototype = {
 
 		this._render.push(function(request, response){
 			var data = {};
-			for(var key in fixedData) {
-				data[key] = fixedData[key];
+			for(var key_fd in fixedData) {
+        			if(fixedData.hasOwnProperty(key_fd))
+					data[key_fd] = fixedData[key_fd];
 			}
-			for(var key in this.stash) {
-				data[key] = this.stash[key];
+			for(var key_s in this.stash) {
+        			if(this.stash.hasOwnProperty(key_s))
+					data[key_s] = this.stash[key_s];
 			}
 			Dispatcher.render.call(this.router, template, data, function(err, html){
 				if(err) throw err;
@@ -228,7 +231,7 @@ Dispatcher.Route.prototype = {
 	request:	function(method, uri, data, mapper) {
 		if(typeof this._handler != typeof [])
 			this._handler = [];
-		this._handler.push(function(request, result){
+		this._handler.push(function(request, response){
 			this.request(method, uri, data, mapper);
 		});
 		return this;
@@ -241,9 +244,9 @@ Dispatcher.Route.prototype = {
 	stash2json:	function(mapper) {
 		if(typeof this._handler != typeof [])
 			this._handler = [];
-		this._handler.push(function(request, result){
+		this._handler.push(function(request, response){
 			var data;
-			if(mapper == null) {
+			if(mapper === undefined) {
 				data = this.stash;
 			} else if(typeof mapper == typeof []) {
 				mapper.forEach(function(key){
@@ -251,18 +254,19 @@ Dispatcher.Route.prototype = {
 				});
 			} else if(typeof mapper == typeof {}) {
 				for(var key in mapper) {
-					data[mapper[key]] = this.stash[key];
+          				if(mapper.hasOwnProperty(key))
+						data[mapper[key]] = this.stash[key];
 				}
 			} else {
 				data = this.stash[mapper];
 			}
-			result.end(JSON.stringify(data));
+			response.end(JSON.stringify(data));
 		});
 		return this;
 	},
 };
 
-function _setSetter(name, value) {
+function _setSetter(name) {
 	this[name] = function(value){
 		var attr = "_" + name;
 		if(typeof this[attr] != typeof [])
@@ -279,3 +283,5 @@ _setSetter.call(Dispatcher.Route.prototype, "uri");
 _setSetter.call(Dispatcher.Route.prototype, "handler");
 
 module.exports = Dispatcher;
+
+
