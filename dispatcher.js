@@ -123,10 +123,10 @@ Dispatcher.render = function(template, data, cb) {
 
 Dispatcher.prototype.newRoute = Dispatcher.prototype.route;
 
-Dispatcher.PreparedRoute = function(route) {
+Dispatcher.PreparedRoute = function(route, data) {
 	this.route	= route;
 	this.router	= route.router;
-	this.stash	= {};
+	this.stash	= data || {};
 	this.params	= {};
 }
 
@@ -138,8 +138,14 @@ Dispatcher.PreparedRoute.prototype = {
 		return Dispatcher["_match_" + attr].call(hash, request);
 	},
 	exec:		function(request, response, data) {
-		this.handle(request, response);
-		this.render(request, response);
+		var context;
+		if(data != null) {
+			context = new Dispatcher.PreparedRoute(this.route, data);
+		} else {
+			context = this;
+		}
+		context.handle(request, response);
+		context.render(request, response);
 	},
 	handle:		function(request, response) {
 		//console.log(request.method + " " + request.url);
