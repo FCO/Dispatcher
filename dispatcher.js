@@ -64,7 +64,7 @@ Dispatcher.prototype = {
 		if(matches.length > 0) {
 			route =  matches[0];
 		} else {
-			route = new Dispatcher.PreparedRoute(new Dispatcher.Route().uri("").handler(Dispatcher.notFoundHandler));
+			route = new Dispatcher.Context(new Dispatcher.Route().uri("").handler(Dispatcher.notFoundHandler));
 		}
 		//console.log(route.toString());
 		route.exec(request, response);
@@ -73,7 +73,7 @@ Dispatcher.prototype = {
 	_prepare_routes:	function(routes) {
 		var prepared = [];
 		routes.forEach(function(route){
-			this.push(new Dispatcher.PreparedRoute(route));
+			this.push(new Dispatcher.Context(route));
 		}.bind(prepared));
 		return prepared;
 	},
@@ -124,14 +124,14 @@ Dispatcher.render = function(template, data, cb) {
 
 Dispatcher.prototype.newRoute = Dispatcher.prototype.route;
 
-Dispatcher.PreparedRoute = function(route, data) {
+Dispatcher.Context = function(route, data) {
 	this.route	= route;
 	this.router	= route.router;
 	this.stash	= data || {};
 	this.params	= {};
 };
 
-Dispatcher.PreparedRoute.prototype = {
+Dispatcher.Context.prototype = {
 	match:	function(attr, request) {
 		var hash	= this.route.toHash();
 		hash.stash	= this.stash;
@@ -141,7 +141,7 @@ Dispatcher.PreparedRoute.prototype = {
 	exec:		function(request, response, data) {
 		var context;
 		if(data !== undefined) {
-			context = new Dispatcher.PreparedRoute(this.route, data);
+			context = new Dispatcher.Context(this.route, data);
 		} else {
 			context = this;
 		}

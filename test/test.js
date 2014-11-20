@@ -7,8 +7,8 @@ describe("requires" , function(){
 		Router.should.be.a.Function;
 		(Router.Route == null).should.not.be.true;
 		Router.Route.should.be.a.Function;
-		(Router.PreparedRoute == null).should.be.false;
-		Router.PreparedRoute.should.be.a.Function;
+		(Router.Context == null).should.be.false;
+		Router.Context.should.be.a.Function;
 	});
 	it("should have the right static methods", function(){
 		Router.should.have.a.property("notFoundHandler");
