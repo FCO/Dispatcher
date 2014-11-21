@@ -1,3 +1,4 @@
+require("./asyncForEach.js");
 var uriTemplate = require("uri-templates");
 
 var _match_order = [
@@ -138,15 +139,25 @@ Dispatcher.Context.prototype = {
 		hash.params	= this.params;
 		return Dispatcher["_match_" + attr].call(hash, request);
 	},
-	exec:		function(request, response, data) {
+	exec:		function(request, response, fixedData) {
 		var context;
-		if(data !== undefined) {
+		if(fixedData !== undefined) {
+			var data = {};
+			for(var key_s in this.stash) {
+				if(this.stash.hasOwnProperty(key_s))
+					data[key_s] = this.stash[key_s];
+			}
+			for(var key_fd in fixedData) {
+				if(fixedData.hasOwnProperty(key_fd))
+					data[key_fd] = fixedData[key_fd];
+			}
 			context = new Dispatcher.Context(this.route, data);
 		} else {
 			context = this;
 		}
-		context.handle(request, response);
-		context.render(request, response);
+		context.handle.cba(function(){
+			context.render(request, response);
+		}, context)(request, response);
 	},
 	handle:		function(request, response) {
 		//console.log(request.method + " " + request.url);
