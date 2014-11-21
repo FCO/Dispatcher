@@ -297,39 +297,31 @@ describe("dispatch" , function(){
 		beforeEach("Create router", function(){
 			did_run = false;
 			router = new Router();
-			router.newRoute().handler(function(){
-				did_run = true;
+			router.newRoute().handler(function(req, res){
+				req.done();
 			});
 		});
-		it("no arguments", function(){
-			runDispatcher();
-			setTimeout(function(){did_run.should.be.true;}, 10);
+		it("no arguments", function(done){
+			runDispatcher({method: "XXX", url: "/", done: done});
 		});
-		it("with method and url", function(){
-			runDispatcher({method: "XXX", url: "/yyy"});
-			setTimeout(function(){did_run.should.be.true;}, 10);
+		it("with method and url", function(done){
+			runDispatcher({method: "XXX", url: "/yyy", done: done});
 		});
-		it("with another route", function(){
+		it("with another route", function(done){
 			var did_bla_run = false;
-			router.firstRoute().uri("/bla").handler(function(){
-				did_bla_run = true;
+			router.firstRoute().uri("/bla").handler(function(req, res){
+				req.test(true);
 			});
-			runDispatcher({method: "XXX", url: "/bla"});
-			setTimeout(function(){did_bla_run.should.be.true;}, 10);
-			setTimeout(function(){did_run.should.be.false;}, 10);
-			runDispatcher({method: "XXX", url: "/ble"});
-			setTimeout(function(){did_run.should.be.true;}, 10);
+			runDispatcher({method: "XXX", url: "/bla", test: function(test){test.should.be.true;}});
+			runDispatcher({method: "XXX", url: "/ble", done: done});
 		});
 		it.skip("with another route, with any order", function(){
 			var did_bla_run = false;
 			router.newRoute().uri("/bla").handler(function(){
-				did_bla_run = true;
+				this.test(true);
 			});
-			runDispatcher({method: "XXX", url: "/bla"});
-			setTimeout(function(){did_bla_run.should.be.true;}, 10);
-			setTimeout(function(){did_run.should.be.false;}, 10);
-			runDispatcher({method: "XXX", url: "/ble"});
-			setTimeout(function(){did_run.should.be.true;}, 10);
+			runDispatcher({method: "XXX", url: "/bla", test: function(test){test.should.be.true;}});
+			runDispatcher({method: "XXX", url: "/ble", done: done});
 		});
 	});
 });
