@@ -170,18 +170,23 @@ describe("Router.Route" , function(){
 				data.should.be.equal("404 not found");
 			}});
 		});
-		it("method", function(){
+		it("method", function(done){
 			did_run = false;
 			router = new Router();
 			router.newRoute().method("YYY").handler(function(){
 				did_run = true;
 			});
 			runDispatcher({method: "XXX", url: "/bla"});
-			did_run.should.be.false;
-			runDispatcher({method: "YYY", url: "/bla"});
-			did_run.should.be.true;
+			setTimeout(function(){
+				did_run.should.be.false;
+				runDispatcher({method: "YYY", url: "/bla"});
+				setTimeout(function(){
+					did_run.should.be.true;
+					done();
+				}, 10);
+			}, 10);
 		});
-		it("uri", function(){
+		it("uri", function(done){
 			var did_after_run = false;
 			did_run = false;
 			router = new Router();
@@ -196,31 +201,46 @@ describe("Router.Route" , function(){
 					})
 			;
 			runDispatcher({method: "XXX", url: "/ble"});
-			did_run.should.be.true;
-			did_after_run.should.be.false;
+			setTimeout(function(){
+				did_run.should.be.true;
+				setTimeout(function(){
+					did_after_run.should.be.false;
+					done();
+				}, 10);
+			}, 10);
 		});
-		it("handler", function(){
+		it("handler", function(done){
 			did_run = false;
 			router = new Router();
 			router.newRoute().uri("/bla").handler(function(){
 				did_run = true;
 			});
 			runDispatcher({method: "XXX", url: "/ble"});
-			did_run.should.be.false;
-			runDispatcher({method: "XXX", url: "/bla"});
-			did_run.should.be.true;
+			setTimeout(function(){
+				did_run.should.be.false;
+				runDispatcher({method: "XXX", url: "/bla"});
+				setTimeout(function(){
+					did_run.should.be.true;
+					done();
+				}, 10);
+			}, 10);
 		});
-		it("name", function(){
+		it("name", function(done){
 			did_run = false;
 			router = new Router();
 			router.newRoute().name("test").handler(function(){
 				did_run = true;
 			});
-			router.namedRoutes.should.have.a.property("test");
-			runDispatcher({method: "XXX", url: "/bla"});
-			did_run.should.be.true;
+			setTimeout(function(){
+				router.namedRoutes.should.have.a.property("test");
+				runDispatcher({method: "XXX", url: "/bla"});
+				setTimeout(function(){
+					did_run.should.be.true;
+					done();
+				}, 10);
+			}, 10);
 		});
-		it("handler require", function(){
+		it("handler require", function(done){
 			router = new Router();
 			var did_run_obj = {run: false};
 			router.newRoute()
@@ -230,17 +250,32 @@ describe("Router.Route" , function(){
 				.handler("./testHandler.js")
 			;
 			runDispatcher({method: "XXX", url: "/ble"});
-			did_run_obj.run.should.be.true;
+			setTimeout(function(){
+				did_run_obj.run.should.be.true;
+				done();
+			}, 10);
 		});
-		it("render", function(){
+		it("render", function(done){
+			this.timeout(5000);
 			did_run = false;
 			router = new Router();
-			router.newRoute().uri("/tmpl/{number}{?filter}").render("test.tmpl", {data1: "bla", data2: "ble"});
-			runDispatcher({method: "XXX", url: "/tmpl/123?filter=test"}, {writeHead: function(){}, end: function(data){
-				data.should.be.equal("<html>\n\t<body>\n\t\ttitle: <h1>bla ble</h1>\n\t\tnumber: 123 filter: test\n\t</body>\n</html>");
-			}});
+			router.newRoute()
+				.uri("/tmpl/{number}{?filter}")
+				.render("test.tmpl", {data1: "bla", data2: "ble"})
+			;
+
+			runDispatcher({
+				method:		"XXX",
+				url:		"/tmpl/123?filter=test"
+			}, {
+				writeHead: 	function(){},
+				end:		function(data){
+					data.should.be.equal("<html>\n\t<body>\n\t\ttitle: <h1>bla ble</h1>\n\t\tnumber: 123 filter: test\n\t</body>\n</html>");
+					done();
+				}
+			});
 		});
-		it("stash2json", function(){
+		it("stash2json", function(done){
 			did_run = false;
 			router = new Router();
 			router.newRoute().uri("/stash2json/{test}{?array*}").stash2json();
@@ -248,7 +283,10 @@ describe("Router.Route" , function(){
 				did_run = true;
 				data.should.be.equal("{\"test\":\"bla\",\"array\":[\"a\",\"b\",\"c\"]}");
 			}});
-			did_run.should.be.true;
+			setTimeout(function(){
+				did_run.should.be.true;
+				done();
+			}, 10);
 		});
 	});
 });
@@ -269,11 +307,11 @@ describe("dispatch" , function(){
 		});
 		it("no arguments", function(){
 			runDispatcher();
-			did_run.should.be.true;
+			setTimeout(function(){did_run.should.be.true;}, 10);
 		});
 		it("with method and url", function(){
 			runDispatcher({method: "XXX", url: "/yyy"});
-			did_run.should.be.true;
+			setTimeout(function(){did_run.should.be.true;}, 10);
 		});
 		it("with another route", function(){
 			var did_bla_run = false;
@@ -281,10 +319,10 @@ describe("dispatch" , function(){
 				did_bla_run = true;
 			});
 			runDispatcher({method: "XXX", url: "/bla"});
-			did_bla_run.should.be.true;
-			did_run.should.be.false;
+			setTimeout(function(){did_bla_run.should.be.true;}, 10);
+			setTimeout(function(){did_run.should.be.false;}, 10);
 			runDispatcher({method: "XXX", url: "/ble"});
-			did_run.should.be.true;
+			setTimeout(function(){did_run.should.be.true;}, 10);
 		});
 		it.skip("with another route, with any order", function(){
 			var did_bla_run = false;
@@ -292,10 +330,10 @@ describe("dispatch" , function(){
 				did_bla_run = true;
 			});
 			runDispatcher({method: "XXX", url: "/bla"});
-			did_bla_run.should.be.true;
-			did_run.should.be.false;
+			setTimeout(function(){did_bla_run.should.be.true;}, 10);
+			setTimeout(function(){did_run.should.be.false;}, 10);
 			runDispatcher({method: "XXX", url: "/ble"});
-			did_run.should.be.true;
+			setTimeout(function(){did_run.should.be.true;}, 10);
 		});
 	});
 });

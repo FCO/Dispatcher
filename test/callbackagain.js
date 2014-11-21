@@ -16,7 +16,20 @@ describe("Call Back Again" , function(){
 		});
 		it("should call the callback after", function(){
 			var did_it = false;
-			(function(){return did_it = true}).cba(function(){did_it.should.be.true;})();
+			(function(){
+				did_it = true;
+				return true;
+			}).cba(function(){
+				did_it.should.be.true;
+			})();
+		});
+		it("shouldn't call the callback after", function(){
+			var did_it = false;
+			(function(){
+				did_it = true;
+			}).cba(function(){
+				did_it.should.be.false;
+			})();
 		});
 		it("should use the right 'this'", function(){
 			(function(){

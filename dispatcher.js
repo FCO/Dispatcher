@@ -155,21 +155,21 @@ Dispatcher.Context.prototype = {
 		} else {
 			context = this;
 		}
-		context.handle.cba(function(){
+		context.handle(request, response, function(){
 			context.render(request, response);
-		}, context)(request, response);
+		});
 	},
-	handle:		function(request, response) {
+	handle:		function(request, response, cb) {
 		//console.log(request.method + " " + request.url);
 		var handlers = this.route._handler;
 		if(typeof handlers == typeof function(){})
 			handlers = [handlers];
 		if(typeof handlers == typeof [])
-			handlers.forEach(function loop(handler){
-				if(loop.stop) return;
+			handlers.asyncForEach(function(handler){
 				var ret = handler.call(this, request, response);
-				if(ret === false) loop.stop = true;
-			}.bind(this));
+				if(ret !== false)
+					return true;
+			}.bind(this), cb);
 	},
 	render:		function(request, response) {
 		//console.log(request.method + " " + request.url);
@@ -177,9 +177,9 @@ Dispatcher.Context.prototype = {
 		if(typeof renders == typeof function(){})
 			renders = [renders];
 		if(typeof renders == typeof [])
-			renders.forEach(function(renders){
+			renders.asyncForEach(function(renders){
 				renders.call(this, request, response);
-			}.bind(this));
+			}.bind(this), function(){});
 	},
 	request: function(method, uri, data, mapper) {
 		console.log(method, uri, data, mapper);
