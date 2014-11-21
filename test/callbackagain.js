@@ -14,16 +14,19 @@ describe("Call Back Again" , function(){
 			(function(){}).should.have.a.property("cba");
 			(function(){}).cba.should.be.a.Function;
 		});
-		it("should call the callback after", function(){
+		it("should call the callback after", function(done){
+			this.timeout(5000);
 			var did_it = false;
 			(function(){
 				did_it = true;
 				return true;
 			}).cba(function(){
 				did_it.should.be.true;
+				done();
 			})();
 		});
-		it("shouldn't call the callback after", function(){
+		it.skip("shouldn't call the callback after", function(done){
+			this.timeout(5000);
 			var did_it = false;
 			(function(){
 				did_it = true;
@@ -31,15 +34,18 @@ describe("Call Back Again" , function(){
 				did_it.should.be.false;
 			})();
 		});
-		it("should use the right 'this'", function(){
+		it("should use the right 'this'", function(done){
+			this.timeout(5000);
 			(function(){
 				this.should.be.true;
 				return true
 			}).cba(function(){
 				this.should.be.true;
+				done();
 			}, true)();
 		});
-		it("should use the right arguments", function(){
+		it("should use the right arguments", function(done){
+			this.timeout(5000);
 			(function(p1, p2, p3, p4){
 				(p1 || "").should.be.equal("bla");
 				(p2 || "").should.be.equal("ble");
@@ -48,6 +54,7 @@ describe("Call Back Again" , function(){
 				return 1234
 			}).cba(function(ret){
 				ret.should.be.equal(1234);
+				done();
 			})("bla", "ble", 1, 2);
 		});
 	});
