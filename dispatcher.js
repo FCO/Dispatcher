@@ -130,18 +130,15 @@ Dispatcher.Context = function(route, data) {
 	this.router	= route.router;
 	this.stash	= data || {};
 	this.params	= {};
+	this._handlers	= [];
+	this._renderes	= [];
+	this._request	= null;
+	this._response	= null;
+	this._cb	= null;
 };
 
 Dispatcher.Context.prototype = {
-	match:	function(attr, request) {
-		var hash	= this.route.toHash();
-		hash.stash	= this.stash;
-		hash.params	= this.params;
-		return Dispatcher["_match_" + attr].call(hash, request);
-	},
-	exec:		function(request, response, fixedData) {
-		var context;
-		if(fixedData !== undefined) {
+	clone:	function(fixedData) {
 			var data = {};
 			for(var key_s in this.stash) {
 				if(this.stash.hasOwnProperty(key_s))
@@ -151,39 +148,58 @@ Dispatcher.Context.prototype = {
 				if(fixedData.hasOwnProperty(key_fd))
 					data[key_fd] = fixedData[key_fd];
 			}
-			context = new Dispatcher.Context(this.route, data);
+		return new Dispatcher.Context(this.route, this.stash);
+	},
+	match:	function(attr, request) {
+		var hash	= this.route.toHash();
+		hash.stash	= this.stash;
+		hash.params	= this.params;
+		return Dispatcher["_match_" + attr].call(hash, request);
+	},
+	exec:		function(request, response, fixedData) {
+		var context;
+		if(fixedData !== undefined) {
+			context = this.clone(data);
 		} else {
-			context = this;
+			context = this.clone();
 		}
-		context.handle(request, response, function(){
-			context.render(request, response);
-		});
+		context._request = request;
+		context._response = response;
+		context._cb = this.next_render;
+		context._handlers = context.route._handler;
+		context._renderes = context.route._render;
+		context.next_handler();
 	},
-	handle:		function(request, response, cb) {
-		//console.log(request.method + " " + request.url);
-		var handlers = this.route._handler;
-		if(typeof handlers == typeof function(){})
-			handlers = [handlers];
-		if(typeof handlers == typeof [])
-			handlers.asyncForEach(function(handler){
-				var ret = handler.call(this, request, response);
-				if(ret !== false)
-					return true;
-			}.bind(this), cb);
+	next_handler:	function(resp) {
+		if(resp !== false) this.handle();
 	},
-	render:		function(request, response) {
-		//console.log(request.method + " " + request.url);
-		var renders = this.route._render;
-		if(typeof renders == typeof function(){})
-			renders = [renders];
-		if(typeof renders == typeof [])
-			renders.asyncForEach(function(renders){
-				renders.call(this, request, response);
-			}.bind(this), function(){});
+	next_render:	function(resp) {
+		if(resp !== false) this.render();
 	},
 	request: function(method, uri, data, mapper) {
 		console.log(method, uri, data, mapper);
 		throw "request not implemented yet";
+	},
+	handle: 	function() {
+		var handler = this._handlers.shift();
+		if(handler) {
+			setTimeout(function(){
+				handler.cba(this.next_handler, this)(this._request, this._response);
+			}.bind(this), 0);
+			return;
+		}
+		first_time = true;
+		this._cb.cba(function(req, res){res.end();}, this).call(this, this._request, this._response);
+	},
+	render:		function() {
+		var render = this._renderes.shift();
+		if(render) {
+			setTimeout(function(){
+				render.cba(this.next_render, this)(this._request, this._response);
+			}.bind(this), 0);
+			return;
+		}
+		first_time = true;
 	},
 };
 
@@ -236,6 +252,7 @@ Dispatcher.Route.prototype = {
 				response.writeHead(200, {'Content-Type': 'text/html'});
 				response.end(html);
 			});
+			return true;
 		});
 		return this;
 	},
@@ -248,7 +265,7 @@ Dispatcher.Route.prototype = {
 		return this;
 	},
 	name:		function(name) {
-		this.name = name;
+		this._name = name;
 		this.router.namedRoutes[name] = this;
 		return this;
 	},

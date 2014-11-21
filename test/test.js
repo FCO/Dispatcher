@@ -162,102 +162,105 @@ describe("Router.Route" , function(){
 			var none = function(){};
 			router.dispatch(request || {}, response || {writeHead: none, end: none});
 		}
+		function createResponse(writeHead, end) {
+			return {
+				writeHead:	writeHead	|| function(){},
+				end:		end		|| function(){}
+			};
+		}
 
-		it("not found", function(){
+		it("not found", function(done){
 			router = new Router();
 			router.newRoute().uri("/bla");
-			runDispatcher({method: "XXX", url: "/ble"}, {writeHead: function(){}, end: function(data){
-				data.should.be.equal("404 not found");
-			}});
+			runDispatcher(
+				{method: "XXX", url: "/ble"},
+				createResponse(false, function(data){
+					data.should.be.equal("404 not found");
+					done();
+				})
+			);
 		});
 		it("method", function(done){
 			did_run = false;
 			router = new Router();
-			router.newRoute().method("YYY").handler(function(){
-				did_run = true;
+			router.newRoute().method("XXX").handler(function(req, res){
+				res.end(did_run);
 			});
-			runDispatcher({method: "XXX", url: "/bla"});
-			setTimeout(function(){
-				did_run.should.be.false;
-				runDispatcher({method: "YYY", url: "/bla"});
-				setTimeout(function(){
+			router.newRoute().method("YYY").handler(function(req, res){
+				did_run = true;
+				res.end(did_run);
+			});
+			runDispatcher(
+				{
+					method: "XXX",
+					url: "/bla"
+				},
+				createResponse(false, function(did_run){
+					did_run.should.be.false;
+				})
+			);
+			runDispatcher(
+				{
+					method: "YYY",
+					url: "/bla"
+				},
+				createResponse(false, function(did_run){
 					did_run.should.be.true;
 					done();
-				}, 10);
-			}, 10);
+				})
+			);
 		});
 		it("uri", function(done){
 			var did_after_run = false;
-			did_run = false;
 			router = new Router();
 			router
 				.newRoute()
-					.handler(function(){
-						did_run = true;
+					.handler(function(req, res){
+						req.done();
 						return false;
 					})
-					.handler(function(){
-						did_after_run = true;
+					.handler(function(req, res){
+						req.done("error");
 					})
 			;
-			runDispatcher({method: "XXX", url: "/ble"});
-			setTimeout(function(){
-				did_run.should.be.true;
-				setTimeout(function(){
-					did_after_run.should.be.false;
-					done();
-				}, 10);
-			}, 10);
+
+			runDispatcher({ method: "XXX", url: "/ble", done: done });
 		});
 		it("handler", function(done){
 			did_run = false;
 			router = new Router();
-			router.newRoute().uri("/bla").handler(function(){
-				did_run = true;
+			router.newRoute().handler(function(req, res){
+				req.done();
 			});
-			runDispatcher({method: "XXX", url: "/ble"});
-			setTimeout(function(){
-				did_run.should.be.false;
-				runDispatcher({method: "XXX", url: "/bla"});
-				setTimeout(function(){
-					did_run.should.be.true;
-					done();
-				}, 10);
-			}, 10);
+			runDispatcher({method: "XXX", url: "/ble", done: done});
 		});
 		it("name", function(done){
 			did_run = false;
 			router = new Router();
-			router.newRoute().name("test").handler(function(){
-				did_run = true;
-			});
-			setTimeout(function(){
-				router.namedRoutes.should.have.a.property("test");
-				runDispatcher({method: "XXX", url: "/bla"});
-				setTimeout(function(){
-					did_run.should.be.true;
-					done();
-				}, 10);
-			}, 10);
+			router.newRoute()
+				.name("test")
+				.handler(function(req, res){
+					this.route._name.should.be.equal("test");
+					this.route.router.namedRoutes.should.have.a.property("test");
+					req.done();
+				})
+			;
+			runDispatcher({method: "XXX", url: "/bla", done: done});
 		});
 		it("handler require", function(done){
 			router = new Router();
 			var did_run_obj = {run: false};
 			router.newRoute()
-				.handler(function(){
-					this.stash.did_run_obj = did_run_obj
-				})
 				.handler("./testHandler.js")
 			;
-			runDispatcher({method: "XXX", url: "/ble"});
-			setTimeout(function(){
-				did_run_obj.run.should.be.true;
-				done();
-			}, 10);
+			runDispatcher({
+				method:		"XXX",
+				url:		"/ble",
+				done:		done
+			});
 		});
 		it("render", function(done){
 			this.timeout(5000);
-			did_run = false;
 			router = new Router();
 			router.newRoute()
 				.uri("/tmpl/{number}{?filter}")
@@ -267,26 +270,19 @@ describe("Router.Route" , function(){
 			runDispatcher({
 				method:		"XXX",
 				url:		"/tmpl/123?filter=test"
-			}, {
-				writeHead: 	function(){},
-				end:		function(data){
+			}, createResponse(false,
+				function(data){
 					data.should.be.equal("<html>\n\t<body>\n\t\ttitle: <h1>bla ble</h1>\n\t\tnumber: 123 filter: test\n\t</body>\n</html>");
 					done();
-				}
-			});
+			}));
 		});
 		it("stash2json", function(done){
-			did_run = false;
 			router = new Router();
 			router.newRoute().uri("/stash2json/{test}{?array*}").stash2json();
 			runDispatcher({method: "XXX", url: "/stash2json/bla?array=a&array=b&array=c"}, {writeHead: function(){}, end: function(data){
-				did_run = true;
 				data.should.be.equal("{\"test\":\"bla\",\"array\":[\"a\",\"b\",\"c\"]}");
-			}});
-			setTimeout(function(){
-				did_run.should.be.true;
 				done();
-			}, 10);
+			}});
 		});
 	});
 });
