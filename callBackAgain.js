@@ -5,5 +5,5 @@ Function.prototype.cba = function(cb, obj) {
 			var ret = this.apply(obj, func_args);
 			if(ret !== undefined) cb.call(obj, ret);
 		}.bind(this), 0);
-	}.bind(this)
+	}.bind(this);
 };
