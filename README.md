@@ -1,4 +1,4 @@
 # Dispatcher
-[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/FCO/Dispatcher?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=)
+[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/FCO/Dispatcher?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 JS http route dispatcher
