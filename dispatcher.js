@@ -78,6 +78,9 @@ Dispatcher.prototype = {
 		}.bind(prepared));
 		return prepared;
 	},
+	getRouteByName:		function(name, data) {
+		return new Dispatcher.Context(this.namedRoutes[name], data);
+	},
 };
 
 Dispatcher.internalServerError = function(request, response) {
@@ -148,7 +151,7 @@ Dispatcher.Context.prototype = {
 				if(fixedData.hasOwnProperty(key_fd))
 					data[key_fd] = fixedData[key_fd];
 			}
-		return new Dispatcher.Context(this.route, this.stash);
+		return new Dispatcher.Context(this.route, data);
 	},
 	match:	function(attr, request) {
 		var hash	= this.route.toHash();
@@ -159,7 +162,7 @@ Dispatcher.Context.prototype = {
 	exec:		function(request, response, fixedData) {
 		var context;
 		if(fixedData !== undefined) {
-			context = this.clone(data);
+			context = this.clone(fixedData);
 		} else {
 			context = this.clone();
 		}
