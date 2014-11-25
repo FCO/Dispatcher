@@ -10,19 +10,24 @@ describe("requires" , function(){
 		(Router.Context == null).should.be.false;
 		Router.Context.should.be.a.Function;
 	});
-	it("should have the right static methods", function(){
-		Router.should.have.a.property("notFoundHandler");
-		Router.notFoundHandler.should.be.a.Function;
+	it("should have the right methods", function(){
+		var dispatcher = new Router();
+		dispatcher.should.have.a.property("notFoundHandler");
+		dispatcher.notFoundHandler.should.be.a.Function;
 
-		Router.should.have.a.property("_match_method");
-		Router._match_method.should.be.a.Function;
+		dispatcher.should.have.a.property("internalServerErrorHandler");
+		dispatcher.internalServerErrorHandler.should.be.a.Function;
 
-		Router.should.have.a.property("_match_uri");
-		Router._match_uri.should.be.a.Function;
+		dispatcher.should.have.a.property("_match_method");
+		dispatcher._match_method.should.be.a.Function;
+
+		dispatcher.should.have.a.property("_match_uri");
+		dispatcher._match_uri.should.be.a.Function;
 	});
 	it("should return 404", function(){
+		var dispatcher = new Router();
 		var ended = false;
-		Router.notFoundHandler({},
+		dispatcher.notFoundHandler({},
 			{
 				writeHead:	function(code, header) {
 					code.should.be.equal(404);
@@ -35,23 +40,24 @@ describe("requires" , function(){
 		ended.should.be.true;
 	});
 	it("should test method", function(){
-		Router._match_method.call({method: ["XXX"]},			{method: "XXX"}).should.be.true;
-		Router._match_method.call({method: ["XXX", "YYY", "ZZZ"]},	{method: "XXX"}).should.be.true;
-		Router._match_method.call({method: ["XXX", "YYY", "ZZZ"]},	{method: "ZZZ"}).should.be.true;
+		var dispatcher = new Router();
+		dispatcher._match_method.call({method: ["XXX"]},		{method: "XXX"}).should.be.true;
+		dispatcher._match_method.call({method: ["XXX", "YYY", "ZZZ"]},	{method: "XXX"}).should.be.true;
+		dispatcher._match_method.call({method: ["XXX", "YYY", "ZZZ"]},	{method: "ZZZ"}).should.be.true;
 
-		Router._match_method.call({method: ["XXX"]},			{method: "AAA"}).should.be.false;
-		Router._match_method.call({method: ["XXX", "YYY", "ZZZ"]},	{method: "AAA"}).should.be.false;
+		dispatcher._match_method.call({method: ["XXX"]},		{method: "AAA"}).should.be.false;
+		dispatcher._match_method.call({method: ["XXX", "YYY", "ZZZ"]},	{method: "AAA"}).should.be.false;
 	});
 	it("should test uri and save params", function(){
+		var dispatcher = new Router();
 		var sts = [{}, {}, {}, {}, null, null];
 		var prm = [{}, {}, {}, {}, null, null];
-		Router._match_uri.call({stash: sts[0], params: prm[0], uri: ["/bla/{id}"]}, 					{url: "/bla/123"}).should.be.true;
-		Router._match_uri.call({stash: sts[1], params: prm[1], uri: ["/bla/{id}", "/ble/{par1}/{par2}", "/bli"]},	{url: "/bla/123"}).should.be.true;
-		Router._match_uri.call({stash: sts[2], params: prm[2], uri: ["/bla/{id}", "/ble/{par1}/{par2}", "/bli"]},	{url: "/bli"}).should.be.true;
-		Router._match_uri.call({stash: sts[3], params: prm[3], uri: ["/bla/{id}", "/ble/{par1}/{par2}", "/bli"]},	{url: "/ble/a/b"}).should.be.true;
-                                                                    
-		Router._match_uri.call({stash: sts[4], params: prm[4], uri: ["/bla/{id}", "/ble/{par1}/{par2}", "/bli"]},   	{url: "AAA"}).should.be.false;
-		Router._match_uri.call({stash: sts[5], params: prm[5], uri: ["/bla/{id}", "/ble/{par1}/{par2}", "/bli"]},	{url: "AAA"}).should.be.false;
+		dispatcher._match_uri.call({stash: sts[0], params: prm[0], uri: ["/bla/{id}"]}, 					{url: "/bla/123"}).should.be.true;
+		dispatcher._match_uri.call({stash: sts[1], params: prm[1], uri: ["/bla/{id}", "/ble/{par1}/{par2}", "/bli"]},	{url: "/bla/123"}).should.be.true;
+		dispatcher._match_uri.call({stash: sts[2], params: prm[2], uri: ["/bla/{id}", "/ble/{par1}/{par2}", "/bli"]},	{url: "/bli"}).should.be.true;
+		dispatcher._match_uri.call({stash: sts[3], params: prm[3], uri: ["/bla/{id}", "/ble/{par1}/{par2}", "/bli"]},	{url: "/ble/a/b"}).should.be.true;
+		dispatcher._match_uri.call({stash: sts[4], params: prm[4], uri: ["/bla/{id}", "/ble/{par1}/{par2}", "/bli"]},   	{url: "AAA"}).should.be.false;
+		dispatcher._match_uri.call({stash: sts[5], params: prm[5], uri: ["/bla/{id}", "/ble/{par1}/{par2}", "/bli"]},	{url: "AAA"}).should.be.false;
 
 		sts[0].should.be.eql({id: "123"})		.and.be.eql(prm[0]);
 		sts[1].should.be.eql({id: "123"})		.and.be.eql(prm[1]);

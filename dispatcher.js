@@ -26,7 +26,7 @@ Dispatcher.prototype = {
 			try {
 				this.dispatch(req, res);
 			} catch(err) {
-				Dispatcher.internalServerError(req, res);
+				this.internalServerErrorHandler(req, res);
 			}
 		}.bind(this)).listen(
 			port || this.port,
@@ -48,7 +48,7 @@ Dispatcher.prototype = {
 		this.routes.push(new_route);
 		return new_route;
 	},
-	dispatch:	function(request, response) {
+	match:	function(request) {
 		var route;
 		//console.log(request);
 		var matches = this._prepare_routes(this.routes);
@@ -61,11 +61,16 @@ Dispatcher.prototype = {
 			});
 			matches = newMatches;
 		});
+		return matches;
+	},
+
+	dispatch:	function(request, response) {
+		var matches = this.match(request);
 
 		if(matches.length > 0) {
 			route =  matches[0];
 		} else {
-			route = new Dispatcher.Context(new Dispatcher.Route().uri("").handler(Dispatcher.notFoundHandler));
+			route = new Dispatcher.Context(new Dispatcher.Route(this).handler(this.notFoundHandler));
 		}
 		//console.log(route.toString());
 		route.exec(request, response);
@@ -81,39 +86,40 @@ Dispatcher.prototype = {
 	getRouteByName:		function(name, data) {
 		return new Dispatcher.Context(this.namedRoutes[name], data);
 	},
-};
 
-Dispatcher.internalServerError = function(request, response) {
-	response.writeHead(500, {'Content-Type': 'text/plain'});
-	response.end("500 internal server error");
-};
+	internalServerErrorHandler:	function(request, response) {
+		response.writeHead(500, {'Content-Type': 'text/plain'});
+		response.end("500 internal server error");
+	},
+	
+	notFoundHandler:	function(request, response) {
+		response.writeHead(404, {'Content-Type': 'text/plain'});
+		response.end("404 not found");
+	},
 
-Dispatcher.notFoundHandler = function(request, response) {
-	response.writeHead(404, {'Content-Type': 'text/plain'});
-	response.end("404 not found");
-};
+	_match_method:	function(request) {
+		//console.log(this.method + " == " + request.method);
+		if(this.method === undefined || this.method.length === 0) return true;
+		return this.method.indexOf(request.method) >= 0;
+	},
 
-Dispatcher._match_method	= function(request) {
-	//console.log(this.method + " == " + request.method);
-	if(this.method === undefined || this.method.length === 0) return true;
-	return this.method.indexOf(request.method) >= 0;
-};
-
-Dispatcher._match_uri	= function(request) {
-	//console.log(this.uri + " == " + request.url);
-	if(this.uri === undefined || this.uri.length === 0) return true;
-	var found = false;
-	(this.uri || []).forEach(function(uri){
-		var data = uriTemplate(uri).fromUri(request.url);
-		if(data !== undefined) {
-			for(var key in data) {
-        			if(data.hasOwnProperty(key))
-					this.params[key] = this.stash[key] = data[key];
+	_match_uri:	function(request) {
+		//console.log(this.uri + " == " + request.url);
+		if(this.uri === undefined || this.uri.length === 0) return true;
+		var found = false;
+		(this.uri || []).forEach(function(uri){
+			var data = uriTemplate(uri).fromUri(request.url);
+			if(data !== undefined) {
+				for(var key in data) {
+	        			if(data.hasOwnProperty(key))
+						this.params[key] = this.stash[key] = data[key];
+				}
+				found = true;
 			}
-			found = true;
-		}
-	}.bind(this));
-	return found;
+		}.bind(this));
+		return found;
+	},
+
 };
 
 Dispatcher.importTemplates = function() {
@@ -157,7 +163,7 @@ Dispatcher.Context.prototype = {
 		var hash	= this.route.toHash();
 		hash.stash	= this.stash;
 		hash.params	= this.params;
-		return Dispatcher["_match_" + attr].call(hash, request);
+		return this.route.router["_match_" + attr].call(hash, request);
 	},
 	exec:		function(request, response, fixedData) {
 		var context;
