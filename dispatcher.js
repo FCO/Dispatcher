@@ -230,12 +230,12 @@ Dispatcher.Context.prototype = {
 		if(handler) {
 			setTimeout(function(){
 				debug(10, "handle() setTimeout()");
-				handler.cba(this.next_handler, this, this.route.onError)(this._request, this._response);
+				handler.cba(this.next_handler, this, this.route._onError)(this._request, this._response);
 			}.bind(this), 0);
 			return;
 		}
 		first_time = true;
-		this._cb.cba(function(req, res){res.end();}, this, this.route.onError).call(this, this._request, this._response);
+		this._cb.cba(function(req, res){res.end();}, this, this.route._onError).call(this, this._request, this._response);
 	},
 	render:		function() {
 			debug(10, "Dispatcher.Context.render()");
@@ -244,7 +244,7 @@ Dispatcher.Context.prototype = {
 		if(render) {
 			setTimeout(function(){
 				debug(10, "render() setTimeout()");
-				render.cba(this.next_render, this, this.route.onError)(this._request, this._response);
+				render.cba(this.next_render, this, this.route._onError)(this._request, this._response);
 			}.bind(this), 0);
 			return;
 		}
@@ -258,8 +258,11 @@ Dispatcher.Route = function(router) {
 };
 
 Dispatcher.Route.prototype = {
-	onError:	function(err, request, response) {
+	_onError:	function(err, request, response) {
 		return this.router.internalServerErrorHandler.call(this, request, response);
+	},
+	onError:	function(onError) {
+		this._onError = onError;
 	},
 	toString:	function() {
 			debug(10, "toString()");
