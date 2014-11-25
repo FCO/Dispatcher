@@ -175,8 +175,8 @@ Dispatcher.Context.prototype = {
 		context._request = request;
 		context._response = response;
 		context._cb = this.next_render;
-		context._handlers = context.route._handler	|| [];
-		context._renderes = context.route._render	|| [];
+		context._handlers = (context.route._handler	|| []).slice();
+		context._renderes = (context.route._render	|| []).slice();
 		context.next_handler();
 	},
 	next_handler:	function(resp) {
