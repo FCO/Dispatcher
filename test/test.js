@@ -248,7 +248,6 @@ describe("Router.Route" , function(){
 				.handler(function(req, res){
 					this.route._name.should.be.equal("test");
 					this.route.router.namedRoutes.should.have.a.property("test");
-console.log(this.stash);
 					this.stash.test.should.be.true;
 					req.done();
 				})
