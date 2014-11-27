@@ -232,14 +232,6 @@ describe("Router.Route" , function(){
 
 			runDispatcher({ method: "XXX", url: "/ble", done: done });
 		});
-		it("handler", function(done){
-			did_run = false;
-			router = new Router();
-			router.newRoute().handler(function(req, res){
-				req.done();
-			});
-			runDispatcher({method: "XXX", url: "/ble", done: done});
-		});
 		it("name", function(done){
 			did_run = false;
 			router = new Router();
@@ -256,16 +248,43 @@ describe("Router.Route" , function(){
 			cont.should.be.a.instanceOf(Router.Context);
 			cont.exec({method: "XXX", url: "/bla", done: done}, {}, {test: true});
 		});
-		it("handler require", function(done){
-			router = new Router();
-			var did_run_obj = {run: false};
-			router.newRoute()
-				.handler("./testHandler.js")
-			;
-			runDispatcher({
-				method:		"XXX",
-				url:		"/ble",
-				done:		done
+		describe("handler" , function(){
+			it("func", function(done){
+				did_run = false;
+				router = new Router();
+				router.newRoute().handler(function(req, res){
+					req.done();
+				});
+				runDispatcher({method: "XXX", url: "/ble", done: done});
+			});
+			it("require", function(done){
+				router = new Router();
+				var did_run_obj = {run: false};
+				router.newRoute()
+					.handler("./testHandler.js")
+				;
+				runDispatcher({
+					method:		"XXX",
+					url:		"/ble",
+					done:		done
+				});
+			});
+			it("async", function(done){
+				did_run = false;
+				router = new Router();
+				router
+					.newRoute()
+						.handler(function(req, res){
+							setTimeout(function() {
+								this.stash.done = req.done;
+								return true;
+							}.cba(this.next_handler, this), 10);
+						})
+						.handler(function(req, res){
+							this.stash.done();
+						})
+				;
+				runDispatcher({method: "XXX", url: "/ble", done: done});
 			});
 		});
 		it("render", function(done){
