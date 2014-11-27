@@ -81,7 +81,7 @@ Dispatcher.prototype = {
 	},
 
 	dispatch:	function(request, response) {
-			debug(10, "dispatch()");
+		debug(10, "dispatch()");
 		var matches = this.match(request);
 
 		if(matches.length > 0) {
@@ -94,7 +94,7 @@ Dispatcher.prototype = {
 		return;
 	},
 	_prepare_routes:	function(routes) {
-			debug(10, "_prepare_routes()");
+		debug(10, "_prepare_routes()");
 		var prepared = [];
 		routes.forEach(function(route){
 			debug(10, "_prepare_routes() forEach()");
@@ -103,31 +103,31 @@ Dispatcher.prototype = {
 		return prepared;
 	},
 	getRouteByName:		function(name, data) {
-			debug(10, "getRouteByName()");
+		debug(10, "getRouteByName()");
 		return new Dispatcher.Context(this.namedRoutes[name], data);
 	},
 
 	internalServerErrorHandler:	function(request, response) {
-			debug(10, "internalServerErrorHandler()");
+		debug(10, "internalServerErrorHandler()");
 		response.writeHead(500, {'Content-Type': 'text/plain'});
 		response.end("500 internal server error");
 	},
 	
 	notFoundHandler:	function(request, response) {
-			debug(10, "notFoundHandler()");
+		debug(10, "notFoundHandler()");
 		response.writeHead(404, {'Content-Type': 'text/plain'});
 		response.end("404 not found");
 	},
 
 	_match_method:	function(request) {
-			debug(10, "_match_method()");
+		debug(10, "_match_method()");
 		//console.log(this.method + " == " + request.method);
 		if(this.method === undefined || this.method.length === 0) return true;
 		return this.method.indexOf(request.method) >= 0;
 	},
 
 	_match_uri:	function(request) {
-			debug(10, "_match_uri()");
+		debug(10, "_match_uri()");
 		//console.log(this.uri + " == " + request.url);
 		if(this.uri === undefined || this.uri.length === 0) return true;
 		var found = false;
@@ -148,21 +148,21 @@ Dispatcher.prototype = {
 };
 
 Dispatcher.importTemplates = function() {
-			debug(10, "importTemplates()");
+		debug(10, "importTemplates()");
 	var Template = require("template");
 	this.template = new Template();
 	this.template.pages("templates/*.tmpl");
 };
 
 Dispatcher.render = function(template, data, cb) {
-			debug(10, "Dispatch.render()");
+		debug(10, "Dispatch.render()");
 	this.template.render(template, data, cb);
 };
 
 Dispatcher.prototype.newRoute = Dispatcher.prototype.route;
 
 Dispatcher.Context = function(route, data) {
-			debug(10, "Context()");
+		debug(10, "Context()");
 	this.route	= route;
 	this.router	= route.router;
 	this.stash	= data || {};
@@ -176,7 +176,7 @@ Dispatcher.Context = function(route, data) {
 
 Dispatcher.Context.prototype = {
 	clone:	function(fixedData) {
-			debug(10, "clone()");
+		debug(10, "clone()");
 			var data = {};
 			for(var key_s in this.stash) {
 				if(this.stash.hasOwnProperty(key_s))
@@ -189,14 +189,14 @@ Dispatcher.Context.prototype = {
 		return new Dispatcher.Context(this.route, data);
 	},
 	match:	function(attr, request) {
-			debug(10, "match()");
+		debug(10, "match()");
 		var hash	= this.route.toHash();
 		hash.stash	= this.stash;
 		hash.params	= this.params;
 		return this.route.router["_match_" + attr].call(hash, request);
 	},
 	exec:		function(request, response, fixedData) {
-			debug(10, "exec()");
+		debug(10, "exec()");
 		var context;
 		if(fixedData !== undefined) {
 			context = this.clone(fixedData);
@@ -211,20 +211,20 @@ Dispatcher.Context.prototype = {
 		context.next_handler();
 	},
 	next_handler:	function(resp) {
-			debug(10, "next_handler()");
+		debug(10, "next_handler()");
 		if(resp !== false) this.handle();
 	},
 	next_render:	function(resp) {
-			debug(10, "next_render()");
+		debug(10, "next_render()");
 		if(resp !== false) this.render();
 	},
 	request: function(method, uri, data, mapper) {
-			debug(10, "request()");
+		debug(10, "request()");
 		console.log(method, uri, data, mapper);
 		throw "request not implemented yet";
 	},
 	handle: 	function() {
-			debug(10, "handle()");
+		debug(10, "handle()");
 		var handler = this._handlers.shift();
 		debug(10, "handler:", handler);
 		if(handler) {
@@ -238,7 +238,7 @@ Dispatcher.Context.prototype = {
 		this._cb.cba(function(req, res){res.end();}, this, this.route._onError).call(this, this._request, this._response);
 	},
 	render:		function() {
-			debug(10, "Dispatcher.Context.render()");
+		debug(10, "Dispatcher.Context.render()");
 		var render = this._renderes.shift();
 		debug(10, "render:", render);
 		if(render) {
@@ -253,7 +253,7 @@ Dispatcher.Context.prototype = {
 };
 
 Dispatcher.Route = function(router) {
-			debug(10, "Route()");
+	debug(10, "Route()");
 	this.router = router;
 };
 
@@ -265,15 +265,15 @@ Dispatcher.Route.prototype = {
 		this._onError = onError;
 	},
 	toString:	function() {
-			debug(10, "toString()");
+		debug(10, "toString()");
 		return this._method + " -> " + this._uri;
 	},
 	newRoute:	function() {
-			debug(10, "newRoute()");
+		debug(10, "newRoute()");
 		return this.router.newRoute();
 	},
 	toHash:		function() {
-			debug(10, "toHash()");
+		debug(10, "toHash()");
 		var hash = {};
 		for(var key in this) {
 			if(key.substr(0, 1) === "_") {
@@ -283,13 +283,13 @@ Dispatcher.Route.prototype = {
 		return hash;
 	},
 	_handler:	function(request, response) {
-			debug(10, "_handler()");
+		debug(10, "_handler()");
 		//console.log("custom handler");
 		response.writeHead(200, {'Content-Type': 'text/plain'});
 		response.end("DEFAULT HANDLER: " + this.route.toString());
 	},
 	render:		function(template, fixedData) {
-			debug(10, "Dispatcher.Route.render()");
+		debug(10, "Dispatcher.Route.render()");
 		if(typeof this._handler != typeof [])
 			this._handler = [];
 		if(!this.router.importedTemplates) {
@@ -319,7 +319,7 @@ Dispatcher.Route.prototype = {
 		return this;
 	},
 	request:	function(method, uri, data, mapper) {
-			debug(10, "request()");
+		debug(10, "request()");
 		if(typeof this._handler != typeof [])
 			this._handler = [];
 		this._handler.push(function(request, response){
@@ -328,13 +328,13 @@ Dispatcher.Route.prototype = {
 		return this;
 	},
 	name:		function(name) {
-			debug(10, "name()");
+		debug(10, "name()");
 		this._name = name;
 		this.router.namedRoutes[name] = this;
 		return this;
 	},
 	stash2json:	function(mapper) {
-			debug(10, "stash2json()");
+		debug(10, "stash2json()");
 		if(typeof this._handler != typeof [])
 			this._handler = [];
 		this._handler.push(function(request, response){
