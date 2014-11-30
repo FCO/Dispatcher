@@ -13,6 +13,7 @@ dispatcher
 			res.end("HANDLER: " + this.route.toString());
 		})
 	.newRoute()
+		.name("ble")
 		.method("GET")
 		.uri("/ble")
 	.newRoute()
@@ -25,5 +26,6 @@ dispatcher
 		.request("POST", "/bla", {key: "value"}, {from: "to"})
 		.stash2json()
 ;
+console.log(dispatcher.getRouteByName("ble").route);
 
 dispatcher.start();
