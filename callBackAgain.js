@@ -1,7 +1,7 @@
 Function.prototype.cba = function(cb, obj, onError) {
 	return function() {
 		var func_args = arguments;
-		setTimeout(function(){
+		setImmediate(function(){
 			try {
 				var ret = this.apply(obj, func_args);
 				if(ret !== undefined) cb.call(obj, ret);
@@ -14,6 +14,6 @@ Function.prototype.cba = function(cb, obj, onError) {
 					throw err;
 				}
 			}
-		}.bind(this), 0);
+		}.bind(this));
 	}.bind(this);
 };

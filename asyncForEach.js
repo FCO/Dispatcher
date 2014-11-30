@@ -7,5 +7,5 @@ Array.prototype.asyncForEach = function(cb, cba) {
 	for(var i = this.length - 1; i >= 0; i--) {
 		cbcba(this[i]);
 	}
-	setTimeout(func, 0);
+	setImmediate(func);
 };

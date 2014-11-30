@@ -270,7 +270,6 @@ describe("Router.Route" , function(){
 				});
 			});
 			it("async", function(done){
-				did_run = false;
 				router = new Router();
 				router
 					.newRoute()
