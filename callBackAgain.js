@@ -15,5 +15,5 @@ Function.prototype.cba = function(cb, obj, onError) {
 				}
 			}
 		}.bind(this), 0);
-	}.bind(this)
+	}.bind(this);
 };
