@@ -40,16 +40,17 @@ Dispatcher.prototype = {
 		debug(10, "start()");
 		var http = require('http');
 		
-		http.createServer(function (req, res) {
+		this.server = http.createServer(function (req, res) {
 		debug(10, "createServer()");
 			try {
 				this.dispatch(req, res);
 			} catch(err) {
 				this.internalServerErrorHandler(req, res);
 			}
-		}.bind(this)).listen(
-			port || this.port,
-			ip || this.ip
+		}.bind(this));
+		this.server.listen(
+			port	|| this.port,
+			ip	|| this.ip
 		);
 		debug(2, "Connect at http://" + (ip || this.ip) + ":" + (port || this.port));
 	},
