@@ -1,4 +1,4 @@
-var Dispatcher = require("./main.js");
+var Dispatcher = require("..");
 
 dispatcher = new Dispatcher();
 dispatcher

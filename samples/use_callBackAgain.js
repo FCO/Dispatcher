@@ -1,5 +1,5 @@
-require("./callBackAgain.js");
-require("./asyncForEach.js");
+require("../callBackAgain.js");
+require("../asyncForEach.js");
 
 setTimeout(function(){
 	return "bla";
