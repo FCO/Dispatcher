@@ -2,7 +2,7 @@
   "name": "Dispatcher",
   "version": "0.0.1",
   "description": "A http route dispatcher",
-  "main": "dispatcher.js",
+  "main": "main.js",
   "directories": {
     "test": "test"
   },

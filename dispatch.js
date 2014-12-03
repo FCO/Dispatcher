@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 var path = require("path");
-var Dispatcher = require("./dispatcher.js");
+var Dispatcher = require("./main.js");
 
 dispatcher = new Dispatcher();
 

@@ -1,4 +1,4 @@
-var Dispatcher = require("./dispatcher.js");
+var Dispatcher = require("./main.js");
 
 dispatcher = new Dispatcher();
 dispatcher
@@ -26,6 +26,5 @@ dispatcher
 		.request("POST", "/bla", {key: "value"}, {from: "to"})
 		.stash2json()
 ;
-console.log(dispatcher.getRouteByName("ble").route);
 
 dispatcher.start();
