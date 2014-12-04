@@ -46,6 +46,23 @@ Route.prototype = {
 		}
 		return hash;
 	},
+	render_json:	function(obj) {
+		debug(10, "Dispatcher.Route.render_json()");
+		if(typeof this._handler != typeof [])
+			this._handler = [];
+		if(!this.router.importedTemplates) {
+			this.router.importTemplates();
+		}
+		if(typeof this._render != typeof [])
+			this._render = [];
+
+		this._render.push(function(request, response){
+			response.writeHead(200, {'Content-Type': 'text/json'});
+			response.end(JSON.stringify(obj));
+			return true;
+		});
+		return this;
+	},
 	render:		function(template, fixedData) {
 		debug(10, "Dispatcher.Route.render()");
 		if(typeof this._handler != typeof [])

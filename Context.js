@@ -51,7 +51,12 @@ Context.prototype = {
 		}
 		context._request = request;
 		context._response = response;
-		context._cb = this.next_render;
+		context._cb = function(){
+			this._renderes = (this.route._render	|| []).slice();
+			setImmediate(function(){
+				this.next_render()
+			}.bind(this));
+		}.bind(context);
 		context._handlers = (context.route._handler	|| [
 			function(request, response) {
 				debug(10, "_handler()");
@@ -60,7 +65,6 @@ Context.prototype = {
 				response.end("DEFAULT HANDLER: " + this.route.toString());
 			}
 		]).slice();
-		context._renderes = (context.route._render	|| []).slice();
 		context.next_handler();
 	},
 	next_handler:	function(resp) {
@@ -69,7 +73,7 @@ Context.prototype = {
 	},
 	next_render:	function(resp) {
 		debug(10, "next_render()");
-		if(resp !== false) this.render();
+		if(resp !== false) this.call_render();
 	},
 	request: function(method, uri, data, mapper) {
 		debug(10, "request()");
@@ -88,7 +92,7 @@ Context.prototype = {
 		}
 		this._cb.cba(function(req, res){res.end();}, this, this.route._onError).call(this, this._request, this._response);
 	},
-	render:		function() {
+	call_render:	function() {
 		debug(10, "Dispatcher.Context.render()");
 		var render = this._renderes.shift();
 		if(render) {
@@ -96,8 +100,14 @@ Context.prototype = {
 				debug(10, "render() setImmediate()");
 				render.cba(this.next_render, this, this.route._onError)(this._request, this._response);
 			}.bind(this));
-			return;
+			return true;
 		}
+	},
+	render_json:		function() {
+		this.route.render_json.apply(this.route, arguments);
+	},
+	render:		function() {
+		this.route.render.apply(this.route, arguments);
 	},
 };
 

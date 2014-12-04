@@ -4,7 +4,9 @@ module.exports = function(dispatcher) {
 		.uri("/greetings")
 		.method("GET")
 		.handler(function(req, res){
-			res.end("Helo World!");
+			//res.end("Helo World!");
+			this.render_json({"hello": "world"});
+			return true;
 		})
 	;
 };
