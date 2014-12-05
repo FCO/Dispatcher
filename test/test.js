@@ -82,7 +82,7 @@ describe("requires" , function(){
 	});
 	it("should have a newRoute alias", function(){
 		var router = new Router();
-		router.route.should.be.equal(router.newRoute);
+		router.route.should.be.a.Function;
 	});
 	it("should have a router reference", function(){
 		var router = new Router();

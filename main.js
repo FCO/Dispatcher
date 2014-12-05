@@ -65,11 +65,17 @@ Dispatcher.prototype = {
 		this.routes.unshift(new_route);
 		return new_route;
 	},
-	route:	function() {
+	route:	function(val) {
 		debug(10, "route()");
-		var new_route = new Dispatcher.Route(this);
-		this.routes.push(new_route);
-		return new_route;
+		if(val === undefined) {
+			var new_route = new Dispatcher.Route(this);
+			this.routes.push(new_route);
+			return new_route;
+		} else if(typeof val === typeof "") {
+			return this.getRouteByName(val);
+		} else if(typeof val === typeof {}) {
+			throw "Not implemented";
+		}
 	},
 	match:	function(request) {
 		debug(10, "match()");
@@ -160,7 +166,9 @@ Dispatcher.prototype = {
 
 };
 
-Dispatcher.prototype.newRoute = Dispatcher.prototype.route;
+Dispatcher.prototype.newRoute = function(){
+	return this.route();
+};
 
 module.exports = Dispatcher;
 
