@@ -247,7 +247,7 @@ describe("Router.Route" , function(){
 			var cont = router.getRouteByName("test");
 			cont.should.be.a.instanceOf(Router.Context);
 			var cont2 = router.route("test");
-			cont.should.be.eql(cont2);
+			cont.route.should.be.eql(cont2);
 			cont.exec({method: "XXX", url: "/bla", done: done}, {}, {test: true});
 		});
 		describe("handler" , function(){

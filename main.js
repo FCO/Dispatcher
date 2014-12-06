@@ -72,9 +72,23 @@ Dispatcher.prototype = {
 			this.routes.push(new_route);
 			return new_route;
 		} else if(typeof val === typeof "") {
-			return this.getRouteByName(val);
+			var context = this.getRouteByName(val);
+			if(context !== undefined)
+				return context.route;
+			return this.route().name(val);
+		} else if(val instanceof Array) {
+			val.forEach(function(route){
+				this.route(route);
+			}.bind(this));
 		} else if(typeof val === typeof {}) {
-			throw "Not implemented";
+			var route = this.route();
+			for(var key in val){
+				if(val.hasOwnProperty(key)) {
+					if(route[key] === undefined || typeof route[key] !== typeof function(){})
+						throw "Method '" + key + "' not found";
+					route[key](val[key]);
+				}
+			}
 		}
 	},
 	match:	function(request) {
@@ -123,7 +137,9 @@ Dispatcher.prototype = {
 	},
 	getRouteByName:		function(name, data) {
 		debug(10, "getRouteByName()");
-		return new Dispatcher.Context(this.namedRoutes[name], data);
+		var route = this.namedRoutes[name];
+		if(route !== undefined)
+			return new Dispatcher.Context(route, data);
 	},
 
 	internalServerErrorHandler:	function(request, response) {
