@@ -29,11 +29,10 @@ module.exports = function(dispatcher) {
 		"render_json":	{"hello": "greetings_array_1"}
 	}, {
 		"name":		"greetings_array_2",
-		"uri":		"/greetings_array_2",
+		"uri":		"/greetings/{name}",
 		"method":	"GET",
-		"handler":	function(req, res){
-			this.render_json({"hello": "greetings_array_2"});
-			return true;
+		"render_json":	function(){
+			return {"hello": this.stash.name}
 		}
 	}]);
 };

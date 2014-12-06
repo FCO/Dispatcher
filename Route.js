@@ -46,41 +46,7 @@ Route.prototype = {
 		}
 		return hash;
 	},
-	render_json:	function(obj) {
-		debug(10, "Dispatcher.Route.render_json()");
-		if(typeof this._handler != typeof [])
-			this._handler = [];
-		if(!this.router.importedTemplates) {
-			this.router.importTemplates();
-		}
-		if(typeof this._render != typeof [])
-			this._render = [];
-
-		this._render.push(function(request, response){
-			response.writeHead(200, {'Content-Type': 'text/json'});
-			response.end(JSON.stringify(obj));
-			return true;
-		});
-		return this;
-	},
-	render_text:	function(obj) {
-		debug(10, "Dispatcher.Route.render_json()");
-		if(typeof this._handler != typeof [])
-			this._handler = [];
-		if(!this.router.importedTemplates) {
-			this.router.importTemplates();
-		}
-		if(typeof this._render != typeof [])
-			this._render = [];
-
-		this._render.push(function(request, response){
-			response.writeHead(200, {'Content-Type': 'text/plan'});
-			response.end(obj);
-			return true;
-		});
-		return this;
-	},
-	render_template:	function(template, fixedData) {
+	render:		function(func) {
 		debug(10, "Dispatcher.Route.render()");
 		if(typeof this._handler != typeof [])
 			this._handler = [];
@@ -90,7 +56,28 @@ Route.prototype = {
 		if(typeof this._render != typeof [])
 			this._render = [];
 
-		this._render.push(function(request, response){
+		this._render.push(func);
+		return this;
+	},
+	render_json:	function(obj) {
+		debug(10, "Dispatcher.Route.render_json()");
+		return this.render(function(request, response){
+			response.writeHead(200, {'Content-Type': 'text/json'});
+			response.end(JSON.stringify(_get_value.call(this, obj)));
+			return true;
+		});
+	},
+	render_text:	function(obj) {
+		debug(10, "Dispatcher.Route.render_text()");
+		return this.render(function(request, response){
+			response.writeHead(200, {'Content-Type': 'text/plan'});
+			response.end(_get_value.call(this, obj));
+			return true;
+		})
+	},
+	render_template:	function(template, fixedData) {
+		debug(10, "Dispatcher.Route.render()");
+		return this.render(function(request, response){
 			debug(10, "render() func");
 			var data = {};
 			for(var key_fd in fixedData) {
@@ -168,4 +155,12 @@ _setSetter.call(Route.prototype, "method");
 _setSetter.call(Route.prototype, "uri");
 _setSetter.call(Route.prototype, "handler");
 
+function _get_value(obj) {
+	var value;
+	if(obj.constructor === Function)
+		value = obj.call(this);
+	else
+		value = obj;
+	return value;
+}
 module.exports = Route;
