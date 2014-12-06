@@ -354,3 +354,25 @@ describe("dispatch" , function(){
 		});
 	});
 });
+describe("route()" , function(){
+	it("greetings", function(){
+		var greetings = require("../samples/greetings.js");
+		var dispatch = new Router();
+		greetings(dispatch);
+
+		var greetings_chained_methods = dispatch.getRouteByName("greetings_chained_methods");
+		(greetings_chained_methods != null).should.be.true;
+
+		var greetings_name = dispatch.getRouteByName("greetings_name");
+		(greetings_name != null).should.be.true;
+
+		var greetings_obj = dispatch.getRouteByName("greetings_obj");
+		(greetings_obj != null).should.be.true;
+
+		var greetings_array_1 = dispatch.getRouteByName("greetings_array_1");
+		(greetings_array_1 != null).should.be.true;
+
+		var greetings_array_2 = dispatch.getRouteByName("greetings_array_2");
+		(greetings_array_2 != null).should.be.true;
+	});
+});
