@@ -63,7 +63,24 @@ Route.prototype = {
 		});
 		return this;
 	},
-	render:		function(template, fixedData) {
+	render_text:	function(obj) {
+		debug(10, "Dispatcher.Route.render_json()");
+		if(typeof this._handler != typeof [])
+			this._handler = [];
+		if(!this.router.importedTemplates) {
+			this.router.importTemplates();
+		}
+		if(typeof this._render != typeof [])
+			this._render = [];
+
+		this._render.push(function(request, response){
+			response.writeHead(200, {'Content-Type': 'text/plan'});
+			response.end(obj);
+			return true;
+		});
+		return this;
+	},
+	render_template:	function(template, fixedData) {
 		debug(10, "Dispatcher.Route.render()");
 		if(typeof this._handler != typeof [])
 			this._handler = [];

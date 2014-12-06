@@ -1,6 +1,6 @@
-var Dispatcher = require("..");
+var Dispatcher = require("../main.js");
 
-dispatcher = new Dispatcher();
+var dispatcher = new Dispatcher();
 dispatcher
 	.newRoute()
 		.method("GET")
@@ -19,7 +19,7 @@ dispatcher
 	.newRoute()
 		.method("GET")
 		.uri("/template/{number}{?filter}")
-		.render("test.tmpl", {data1: "bla", data2: "ble"})
+		.render_template("test.tmpl", {data1: "bla", data2: "ble"})
 	.newRoute()
 		.method("GET")
 		.uri("/request")

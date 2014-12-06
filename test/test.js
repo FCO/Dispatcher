@@ -288,12 +288,12 @@ describe("Router.Route" , function(){
 				runDispatcher({method: "XXX", url: "/ble", done: done});
 			});
 		});
-		it("render", function(done){
+		it("render_template", function(done){
 			this.timeout(5000);
 			router = new Router();
 			router.newRoute()
 				.uri("/tmpl/{number}{?filter}")
-				.render("test.tmpl", {data1: "bla", data2: "ble"})
+				.render_template("test.tmpl", {data1: "bla", data2: "ble"})
 			;
 
 			runDispatcher({

@@ -106,7 +106,10 @@ Context.prototype = {
 	render_json:		function() {
 		this.route.render_json.apply(this.route, arguments);
 	},
-	render:		function() {
+	render_text:		function() {
+		this.route.render_text.apply(this.route, arguments);
+	},
+	render_template:	function() {
 		this.route.render.apply(this.route, arguments);
 	},
 };
