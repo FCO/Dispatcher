@@ -244,7 +244,7 @@ describe("Router.Route" , function(){
 					req.done();
 				})
 			;
-			var cont = router.getRouteByName("test");
+			var cont = router.getRouteContextByName("test");
 			cont.should.be.a.instanceOf(Router.Context);
 			var cont2 = router.route("test");
 			cont.route.should.be.eql(cont2);
@@ -354,25 +354,28 @@ describe("dispatch" , function(){
 		});
 	});
 });
-describe("route()" , function(){
-	it("greetings", function(){
+describe("samples" , function(){
+	it("greetings.js", function(){
 		var greetings = require("../samples/greetings.js");
 		var dispatch = new Router();
 		greetings(dispatch);
 
-		var greetings_chained_methods = dispatch.getRouteByName("greetings_chained_methods");
+		var greetings_chained_methods = dispatch.getRouteContextByName("greetings_chained_methods");
 		(greetings_chained_methods != null).should.be.true;
 
-		var greetings_name = dispatch.getRouteByName("greetings_name");
+		var greetings_chained_methods2 = dispatch.route("greetings_chained_methods");
+		greetings_chained_methods.route.should.be.equal(greetings_chained_methods2);
+
+		var greetings_name = dispatch.getRouteContextByName("greetings_name");
 		(greetings_name != null).should.be.true;
 
-		var greetings_obj = dispatch.getRouteByName("greetings_obj");
+		var greetings_obj = dispatch.getRouteContextByName("greetings_obj");
 		(greetings_obj != null).should.be.true;
 
-		var greetings_array_1 = dispatch.getRouteByName("greetings_array_1");
+		var greetings_array_1 = dispatch.getRouteContextByName("greetings_array_1");
 		(greetings_array_1 != null).should.be.true;
 
-		var greetings_array_2 = dispatch.getRouteByName("greetings_array_2");
+		var greetings_array_2 = dispatch.getRouteContextByName("greetings_array_2");
 		(greetings_array_2 != null).should.be.true;
 	});
 });

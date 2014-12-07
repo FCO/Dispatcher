@@ -72,7 +72,7 @@ Dispatcher.prototype = {
 			this.routes.push(new_route);
 			return new_route;
 		} else if(typeof val === typeof "") {
-			var context = this.getRouteByName(val);
+			var context = this.getRouteContextByName(val);
 			if(context !== undefined)
 				return context.route;
 			return this.route().name(val);
@@ -135,8 +135,8 @@ Dispatcher.prototype = {
 		}.bind(prepared));
 		return prepared;
 	},
-	getRouteByName:		function(name, data) {
-		debug(10, "getRouteByName()");
+	getRouteContextByName:		function(name, data) {
+		debug(10, "getRouteContextByName()");
 		var route = this.namedRoutes[name];
 		if(route !== undefined)
 			return new Dispatcher.Context(route, data);
