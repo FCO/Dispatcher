@@ -22,7 +22,7 @@ module.exports = function(dispatcher) {
 			return true;
 		}
 	});
-	dispatcher.route([{
+	dispatcher.route({
 		"name":		"greetings_array_1",
 		"uri":		"/greetings_array_1",
 		"method":	"GET",
@@ -34,5 +34,5 @@ module.exports = function(dispatcher) {
 		"render_json":	function(){
 			return {"hello": this.stash.name}
 		}
-	}]);
+	});
 };

@@ -73,8 +73,14 @@ Dispatcher.prototype = {
 	registerRoute:	function(route) {
 		this.routes.push(route);
 	},
-	route:	function(val) {
+	route:	function() {
 		debug(10, "route()");
+		var val, args = Array.prototype.slice.call(arguments);
+		if(args.length == 1) {
+			val = args.shift();
+		} else if(args.length > 1){
+			val = args;
+		}
 		if(val === undefined) {
 			var new_route = new Dispatcher.Route(this);
 			this.registerRoute(new_route);
