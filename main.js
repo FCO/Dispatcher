@@ -59,17 +59,25 @@ Dispatcher.prototype = {
 		Dispatcher.importTemplates.call(this);
 		this.importedTemplates = true;
 	},
+	printRouteTable:	function() {
+		this.routes.forEach(function(route){
+			console.log(route.toString());
+		});
+	},
 	firstRoute:	function() {
 		debug(10, "firstRoute()");
 		var new_route = new Dispatcher.Route(this);
 		this.routes.unshift(new_route);
 		return new_route;
 	},
+	registerRoute:	function(route) {
+		this.routes.push(route);
+	},
 	route:	function(val) {
 		debug(10, "route()");
 		if(val === undefined) {
 			var new_route = new Dispatcher.Route(this);
-			this.routes.push(new_route);
+			this.registerRoute(new_route);
 			return new_route;
 		} else if(typeof val === typeof "") {
 			var context = this.getRouteContextByName(val);

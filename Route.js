@@ -6,21 +6,31 @@ function debug(level, msg) {
 }
 
 Route = function(router) {
-	Dispatcher = router.constructor;
+	if(router !== undefined)
+		Dispatcher = router.constructor;
 	debug(10, "Route()");
 	Dispatcher.Route = Route;
 	Dispatcher.Context = require("./Context.js");
+	Dispatcher.RouteGroup = require("./RouteGroup.js");
 	this.router = router;
 	
 	Dispatcher.render = function(template, data, cb) {
 			debug(10, "Dispatch.render()");
 		this.template.render(template, data, cb);
 	};
-
-
 };
 
 Route.prototype = {
+	clone:		function() {
+		var my_class = this.constructor;
+		var clone = new my_class(this.router);
+		for(var key in this) {
+			//if(this.hasOwnProperty(key)) {
+				clone[key] = this[key];
+			//}
+		}
+		return clone;
+	},
 	_onError:	function(err, request, response) {
 		console.log("error: ", err);
 		return this.router.internalServerErrorHandler.call(this, request, response);
@@ -30,7 +40,10 @@ Route.prototype = {
 	},
 	toString:	function() {
 		debug(10, "toString()");
-		return this._method + " -> " + this._uri;
+		var str = "";
+		if(this._name !== undefined)
+			str = this._name + ": ";
+		return str + this._method + " -> " + this._uri;
 	},
 	newRoute:	function() {
 		debug(10, "newRoute()");
@@ -136,6 +149,20 @@ Route.prototype = {
 			response.end(JSON.stringify(data));
 		});
 		return this;
+	},
+	subRoutes:	function(subRoutes) {
+		if(typeof subRoutes != typeof [])
+			subRoutes = [subRoutes];
+		var orig = this.clone();
+		var clone = this;
+		var group = new Dispatcher.RouteGroup();
+		subRoutes.forEach(function(subRoute) {
+			group.addRoute(clone);
+			if(clone !== this) this.router.registerRoute(clone);
+			subRoute.call(clone, clone);
+			clone = orig.clone();
+		}.bind(this));
+		return group;
 	},
 };
 
