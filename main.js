@@ -98,8 +98,10 @@ Dispatcher.prototype = {
 			var route = this.route();
 			for(var key in val){
 				if(val.hasOwnProperty(key)) {
-					if(route[key] === undefined || typeof route[key] !== typeof function(){})
-						throw "Method '" + key + "' not found";
+					if(route[key] === undefined || typeof route[key] !== typeof function(){}) {
+						console.error("Method '" + key + "' not found");
+						process.exit();
+					}
 					route[key](val[key]);
 				}
 			}

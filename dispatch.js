@@ -8,7 +8,10 @@ dispatcher = new Dispatcher();
 process.argv.slice(2).forEach(function(module){
 	var file = path.resolve(module);
 	fs.exists(file, function(exists) {
-		if(!exists) throw "File '" + file + "' do not exist.";
+		if(!exists) {
+			console.error("File '" + file + "' do not exist.");
+			process.exit();
+		}
 		console.log("importing " + file);
 		var mod = require(file);
 		if(typeof mod !== typeof [])
