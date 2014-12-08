@@ -5,7 +5,7 @@ module.exports = function(dispatcher) {
 			console.log("request to " + this.route.toString() + "\t\t=> " + JSON.stringify(this.stash));
 			return true;
 		})
-		.subRoutes([
+		.subRoutes(
 			function(route) {
 				route
 					.name("get_user")
@@ -20,7 +20,7 @@ module.exports = function(dispatcher) {
 					.render_text(function(){return this.stash.user_id + " was deleted\n"})
 				;
 			}
-		])
+		)
 	;
 
 	dispatcher.printRouteTable();

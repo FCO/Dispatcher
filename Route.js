@@ -150,9 +150,11 @@ Route.prototype = {
 		});
 		return this;
 	},
-	subRoutes:	function(subRoutes) {
-		if(typeof subRoutes != typeof [])
-			subRoutes = [subRoutes];
+	subRoutes:	function() {
+		var subRoutes = typeof arguments[0] === typeof []
+			? arguments[0]
+			: Array.prototype.slice.call(arguments)
+		;
 		var orig = this.clone();
 		var clone = this;
 		var group = new Dispatcher.RouteGroup();
