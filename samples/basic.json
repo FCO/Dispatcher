@@ -1,0 +1,12 @@
+[
+	{
+		"uri":		"/basic/1",
+		"method":	"GET",
+		"render_text":	"basic 1"
+	},
+	{
+		"uri":		"/basic/2",
+		"method":	"GET",
+		"render_text":	"basic 2"
+	}
+]
