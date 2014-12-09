@@ -40,8 +40,6 @@ function handle_routes(module) {
 				mod = [ mod ];
 			mod.forEach(function(func) {
 				func.cba(next_file, this)(dispatcher);
-				//func(dispatcher);
-				//setImmediate(function(){next_file()});
 			});
 		}
 	});
