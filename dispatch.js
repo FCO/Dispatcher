@@ -14,7 +14,6 @@ function next_file() {
 		setImmediate(function(proc){
 			return handle_routes.cba(next_file, this)(proc);
 		}.call(this, proc));
-	console.log("will start");
 	dispatcher.start();
 }
 
