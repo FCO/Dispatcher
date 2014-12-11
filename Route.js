@@ -41,9 +41,9 @@ Route.prototype = {
 	toString:	function() {
 		debug(10, "toString()");
 		var str = "";
-		if(this._name !== undefined)
+		if(this._name !== undefined && this._name !== null)
 			str = this._name + ": ";
-		return str + this._method + " -> " + this._uri;
+		return str + (this._method ? this._method : "NO_METHOD") + " -> " + this._uri;
 	},
 	newRoute:	function() {
 		debug(10, "newRoute()");

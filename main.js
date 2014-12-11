@@ -35,7 +35,7 @@ Dispatcher.logLevel = 5;
 
 Dispatcher.prototype = {
 	port:	8080,
-	ip:	'127.0.0.1',
+	ip:	'0.0.0.0',
 	start:	function(port, ip) {
 		debug(10, "start()");
 		var http = require('http');
