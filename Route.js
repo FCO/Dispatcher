@@ -108,11 +108,10 @@ Route.prototype = {
 			});
 			return true;
 		});
-		return this;
 	},
 	request:	function(method, uri, data, mapper) {
 		debug(10, "request()");
-		if(typeof this._handler != typeof [])
+		if(! this._handler instanceof Array)
 			this._handler = [];
 		this._handler.push(function(request, response){
 			this.request(method, uri, data, mapper);
@@ -127,28 +126,31 @@ Route.prototype = {
 	},
 	stash2json:	function(mapper) {
 		debug(10, "stash2json()");
-		// Change to push on _render
-		if(typeof this._handler != typeof [])
-			this._handler = [];
-		this._handler.push(function(request, response){
+		if(arguments[1] !== undefined)
+			mapper = Array.prototype.slice.call(arguments);
+		if(mapper instanceof Array) {
+			var tmp = {};
+			mapper.forEach(function(key){
+				tmp[key] = key;
+			});
+			mapper = tmp;
+		}
+		return this.render(function(request, response){
 			var data;
-			if(mapper === undefined) {
+			if(mapper === undefined || mapper === null) {
 				data = this.stash;
-			} else if(typeof mapper == typeof []) {
-				mapper.forEach(function(key){
-					data[key] = this.stash[key];
-				});
-			} else if(typeof mapper == typeof {}) {
+			} else if(mapper instanceof Object) {
+				data = {};
 				for(var key in mapper) {
-          				if(mapper.hasOwnProperty(key))
+          				if(mapper.hasOwnProperty(key)) {
 						data[mapper[key]] = this.stash[key];
+					}
 				}
 			} else {
 				data = this.stash[mapper];
 			}
 			response.end(JSON.stringify(data));
 		});
-		return this;
 	},
 	subRoutes:	function() {
 		var subRoutes = typeof arguments[0] === typeof []
