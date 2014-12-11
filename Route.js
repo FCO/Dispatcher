@@ -135,22 +135,25 @@ Route.prototype = {
 			});
 			mapper = tmp;
 		}
-		return this.render(function(request, response){
-			var data;
-			if(mapper === undefined || mapper === null) {
-				data = this.stash;
-			} else if(mapper instanceof Object) {
-				data = {};
+		var func;
+		if(mapper === undefined || mapper === null) {
+			func = function(request, response){
+				response.end(JSON.stringify(this.stash));
+			};
+		} else if(mapper instanceof Object) {
+			func = function(request, response){
+				var data = {};
 				for(var key in mapper) {
           				if(mapper.hasOwnProperty(key)) {
 						data[mapper[key]] = this.stash[key];
 					}
 				}
-			} else {
-				data = this.stash[mapper];
+				response.end(JSON.stringify(data));
 			}
-			response.end(JSON.stringify(data));
-		});
+		} else func = function(request, response){
+			response.end(JSON.stringify(this.stash[mapper]));
+		};
+		return this.render(func);
 	},
 	subRoutes:	function() {
 		var subRoutes = typeof arguments[0] === typeof []
