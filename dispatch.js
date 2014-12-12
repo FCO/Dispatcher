@@ -2,13 +2,20 @@
 var path = require("path");
 var fs = require("fs");
 var Dispatcher = require("./main.js");
+require("console.table");
 
 dispatcher = new Dispatcher();
 
 var procs = process.argv.slice(2);
 procs.push(function(){
-	console.log("\nRoutes:");
-	this.printRouteTable();
+	console.log();
+	console.table("Routes", this.routes.map(function(route){
+		var obj = {}, hash = route.toHash();
+		["name", "method", "uri"].forEach(function(key){
+			obj[key] = hash[key];
+		});
+		return obj;
+	}));
 	console.log();
 });
 procs.push(dispatcher.start);
@@ -32,7 +39,9 @@ function handle_routes(module) {
 			fs.stat(file, function(err, stat) {
 				if(stat.isDirectory()) {
 					fs.readdir(file, function(err, files) {
-						var new_procs = files.map(function(dir, file){
+						var new_procs = files.filter(function(file){
+							return path.extname(file) == ".js" || path.extname(file) == ".json";
+						}).map(function(dir, file){
 							return dir + "/" + file;
 						}.bind(this, file));
 						procs = new_procs.concat(procs);
