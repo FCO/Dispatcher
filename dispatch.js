@@ -1,4 +1,12 @@
 #!/usr/bin/env node
+
+var argv = require('yargs')
+	.demand(1)
+	.boolean("route-table-only")
+	.alias({"r": "route-table-only", "s": "stash", "n": "run-route"})
+	.argv
+;
+
 var path = require("path");
 var fs = require("fs");
 var Dispatcher = require("./main.js");
@@ -6,7 +14,7 @@ require("console.table");
 
 dispatcher = new Dispatcher();
 
-var procs = process.argv.slice(2);
+var procs = argv._;
 procs.push(function(){
 	console.log();
 	console.table("Routes", this.routes.map(function(route){
@@ -17,8 +25,26 @@ procs.push(function(){
 		return obj;
 	}));
 	console.log();
+	return true;
 });
-procs.push(dispatcher.start);
+if(argv["run-route"] !== undefined) {
+	if(argv["stash"] !== undefined) {
+		var stash = JSON.parse(argv["stash"]);
+	}
+
+	var req = {};
+	var res = {
+		'writeHead':	console.log.bind(console, "HEADER: "),
+		'write':	console.log.bind(console, "BODY:   "),
+		'end':		console.log.bind(console, "BODY:   "),
+	};
+
+	procs.push(function(){
+		this.getRouteContextByName(argv["run-route"]).exec(req, res, stash);
+	});
+} else if(!argv["route-table-only"]) {
+	procs.push(dispatcher.start);
+}
 next_file();
 
 function next_file() {
