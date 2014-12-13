@@ -100,8 +100,10 @@ Context.prototype = {
 				debug(10, "render() setImmediate()");
 				render.cba(this.next_render, this, this.route._onError)(this._request, this._response);
 			}.bind(this));
-			return true;
+		} else {
+			this._response.end();
 		}
+		return true;
 	},
 	render_json:		function() {
 		this.route.render_json.apply(this.route, arguments);

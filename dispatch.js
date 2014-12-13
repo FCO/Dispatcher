@@ -48,7 +48,12 @@ dispatcher = new Dispatcher();
 var procs = argv._;
 
 if(argv.eval !== null) {
-	procs.push(new Function(argv.eval).bind(dispatcher));
+	var eval = argv.eval;
+	if(!(eval instanceof Array))
+		eval = [eval];
+	eval.forEach(function(eval){
+		procs.push(new Function(eval).bind(dispatcher));
+	});
 }
 
 procs.push(function(){

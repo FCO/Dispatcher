@@ -76,7 +76,7 @@ Route.prototype = {
 		debug(10, "Dispatcher.Route.render_json()");
 		return this.render(function(request, response){
 			response.writeHead(200, {'Content-Type': 'text/json'});
-			response.end(JSON.stringify(_get_value.call(this, obj)));
+			response.write(JSON.stringify(_get_value.call(this, obj)));
 			return true;
 		});
 	},
@@ -84,7 +84,7 @@ Route.prototype = {
 		debug(10, "Dispatcher.Route.render_text()");
 		return this.render(function(request, response){
 			response.writeHead(200, {'Content-Type': 'text/plan'});
-			response.end(_get_value.call(this, obj));
+			response.write(_get_value.call(this, obj));
 			return true;
 		})
 	},
@@ -104,7 +104,7 @@ Route.prototype = {
 			Dispatcher.render.call(this.router, template, data, function(err, html){
 				if(err) throw err;
 				response.writeHead(200, {'Content-Type': 'text/html'});
-				response.end(html);
+				response.write(html);
 			});
 			return true;
 		});
@@ -138,7 +138,7 @@ Route.prototype = {
 		var func;
 		if(mapper === undefined || mapper === null) {
 			func = function(request, response){
-				response.end(JSON.stringify(this.stash));
+				response.write(JSON.stringify(this.stash));
 			};
 		} else if(mapper instanceof Object) {
 			func = function(request, response){
@@ -148,10 +148,10 @@ Route.prototype = {
 						data[mapper[key]] = this.stash[key];
 					}
 				}
-				response.end(JSON.stringify(data));
+				response.write(JSON.stringify(data));
 			}
 		} else func = function(request, response){
-			response.end(JSON.stringify(this.stash[mapper]));
+			response.write(JSON.stringify(this.stash[mapper]));
 		};
 		return this.render(func);
 	},

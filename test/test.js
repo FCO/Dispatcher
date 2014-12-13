@@ -166,11 +166,12 @@ describe("Router.Route" , function(){
 		var did_run, router;
 		function runDispatcher(request, response) {
 			var none = function(){};
-			router.dispatch(request || {}, response || {writeHead: none, end: none});
+			router.dispatch(request || {}, response || {writeHead: none, write: none, end: none});
 		}
-		function createResponse(writeHead, end) {
+		function createResponse(writeHead, write, end) {
 			return {
 				writeHead:	writeHead	|| function(){},
+				write:		write		|| function(){},
 				end:		end		|| function(){}
 			};
 		}
@@ -180,7 +181,7 @@ describe("Router.Route" , function(){
 			router.newRoute().uri("/bla");
 			runDispatcher(
 				{method: "XXX", url: "/ble"},
-				createResponse(false, function(data){
+				createResponse(false, function(){}, function(data){
 					data.should.be.equal("404 not found");
 					done();
 				})
@@ -190,11 +191,11 @@ describe("Router.Route" , function(){
 			did_run = false;
 			router = new Router();
 			router.newRoute().method("XXX").handler(function(req, res){
-				res.end(did_run);
+				res.write(did_run);
 			});
 			router.newRoute().method("YYY").handler(function(req, res){
 				did_run = true;
-				res.end(did_run);
+				res.write(did_run);
 			});
 			runDispatcher(
 				{
@@ -308,7 +309,7 @@ describe("Router.Route" , function(){
 		it("stash2json", function(done){
 			router = new Router();
 			router.newRoute().uri("/stash2json/{test}{?array*}").stash2json();
-			runDispatcher({method: "XXX", url: "/stash2json/bla?array=a&array=b&array=c"}, {writeHead: function(){}, end: function(data){
+			runDispatcher({method: "XXX", url: "/stash2json/bla?array=a&array=b&array=c"}, {writeHead: function(){}, write: function(data){
 				data.should.be.equal("{\"test\":\"bla\",\"array\":[\"a\",\"b\",\"c\"]}");
 				done();
 			}});
@@ -321,7 +322,7 @@ describe("dispatch" , function(){
 		var did_run, router;
 		function runDispatcher(request) {
 			var none = function(){};
-			router.dispatch(request || {}, {writeHead: none, end: none});
+			router.dispatch(request || {}, {writeHead: none, write: none});
 		}
 		beforeEach("Create router", function(){
 			did_run = false;
