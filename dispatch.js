@@ -3,7 +3,23 @@
 var argv = require('yargs')
 	.demand(1)
 	.boolean("route-table-only")
-	.alias({"r": "route-table-only", "s": "stash", "n": "run-route"})
+	.describe({
+		"route-table-only":	"Only prints the route table, do not tart the server.",
+		"stash":		"JSON to use with route. (only usable with -n)",
+		"run-route":		"The name of the route to be runned. (dont start the server)",
+	})
+	//.default({
+	//	"route-table-only":	false,
+	//	"stash":		"",
+	//	"run-route":		"",
+	//})
+	.alias({
+		"r":	"route-table-only",
+		"s":	"stash",
+		"n":	"run-route",
+		"h":	"host",
+		"p":	"port",
+	})
 	.argv
 ;
 
@@ -27,6 +43,16 @@ procs.push(function(){
 	console.log();
 	return true;
 });
+if(argv["host"] !== undefined) {
+	procs.push(function(){
+		this.ip = argv["host"];
+	});
+}
+if(argv["port"] !== undefined) {
+	procs.push(function(){
+		this.port = argv["port"];
+	});
+}
 if(argv["run-route"] !== undefined) {
 	if(argv["stash"] !== undefined) {
 		var stash = JSON.parse(argv["stash"]);
