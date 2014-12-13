@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
-var argv = require('yargs')
-	.demand(1)
+var yargs = require('yargs')
 	.usage(
 		"Runs the Dispatcher server with configuration files.\n" +
 		"Usage: $0 [--route-table-only] [--run-route ROUTE_NAME [--stash JSON]] [--port PORT] [--host HOST] files"
@@ -11,6 +10,7 @@ var argv = require('yargs')
 		"route-table-only":	"Only prints the route table, do not tart the server.",
 		"stash":		"JSON to use with route. (only usable with -n)",
 		"run-route":		"The name of the route to be runned. (dont start the server)",
+		"eval":			"Run a given code, the var 'this' is defined as the dispatcher.",
 	})
 	.default({
 		"route-table-only":	false,
@@ -18,6 +18,7 @@ var argv = require('yargs')
 		"run-route":		null,
 		"host":			"0.0.0.0",
 		"port":			8080,
+		"eval":			null,
 	})
 	.string(["route-table-only", "stash", "run-route", "host"])
 	.alias({
@@ -26,10 +27,16 @@ var argv = require('yargs')
 		"n":	"run-route",
 		"h":	"host",
 		"p":	"port",
+		"e":	"eval",
 	})
 	.strict()
-	.argv
 ;
+var argv = yargs.argv;
+
+if(argv._.length == 0 && argv.eval === null) {
+	console.log(yargs.help());
+	process.exit(1);
+}
 
 var path = require("path");
 var fs = require("fs");
@@ -39,6 +46,11 @@ require("console.table");
 dispatcher = new Dispatcher();
 
 var procs = argv._;
+
+if(argv.eval !== null) {
+	procs.push(new Function(argv.eval).bind(dispatcher));
+}
+
 procs.push(function(){
 	console.log();
 	console.table("Routes", this.routes.map(function(route){
