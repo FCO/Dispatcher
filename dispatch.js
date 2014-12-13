@@ -2,17 +2,24 @@
 
 var argv = require('yargs')
 	.demand(1)
+	.usage(
+		"Runs the Dispatcher server with configuration files.\n" +
+		"Usage: $0 [--route-table-only] [--run-route ROUTE_NAME [--stash JSON]] [--port PORT] [--host HOST] files"
+	)
 	.boolean("route-table-only")
 	.describe({
 		"route-table-only":	"Only prints the route table, do not tart the server.",
 		"stash":		"JSON to use with route. (only usable with -n)",
 		"run-route":		"The name of the route to be runned. (dont start the server)",
 	})
-	//.default({
-	//	"route-table-only":	false,
-	//	"stash":		"",
-	//	"run-route":		"",
-	//})
+	.default({
+		"route-table-only":	false,
+		"stash":		null,
+		"run-route":		null,
+		"host":			"0.0.0.0",
+		"port":			8080,
+	})
+	.string(["route-table-only", "stash", "run-route", "host"])
 	.alias({
 		"r":	"route-table-only",
 		"s":	"stash",
@@ -20,6 +27,7 @@ var argv = require('yargs')
 		"h":	"host",
 		"p":	"port",
 	})
+	.strict()
 	.argv
 ;
 
@@ -53,8 +61,8 @@ if(argv["port"] !== undefined) {
 		this.port = argv["port"];
 	});
 }
-if(argv["run-route"] !== undefined) {
-	if(argv["stash"] !== undefined) {
+if(argv["run-route"] !== null) {
+	if(argv["stash"] !== null) {
 		var stash = JSON.parse(argv["stash"]);
 	}
 
