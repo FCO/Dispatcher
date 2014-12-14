@@ -61,12 +61,12 @@ Route.prototype = {
 	},
 	render:		function(func) {
 		debug(10, "Dispatcher.Route.render()");
-		if(typeof this._handler != typeof [])
+		if(!(this._handler instanceof Array))
 			this._handler = [];
 		if(!this.router.importedTemplates) {
 			this.router.importTemplates();
 		}
-		if(typeof this._render != typeof [])
+		if(!(this._render instanceof Array))
 			this._render = [];
 
 		this._render.push(func);
@@ -135,28 +135,23 @@ Route.prototype = {
 			});
 			mapper = tmp;
 		}
-		var func;
 		if(mapper === undefined || mapper === null) {
-			func = function(request, response){
-				response.write(JSON.stringify(this.stash));
-			};
+			this.render_json(function(){return this.stash});
 		} else if(mapper instanceof Object) {
-			func = function(request, response){
+			this.render_json(function(){
 				var data = {};
 				for(var key in mapper) {
           				if(mapper.hasOwnProperty(key)) {
 						data[mapper[key]] = this.stash[key];
 					}
 				}
-				response.write(JSON.stringify(data));
-			}
-		} else func = function(request, response){
-			response.write(JSON.stringify(this.stash[mapper]));
-		};
-		return this.render(func);
+				return data;
+			});
+		} else
+			this.render_json(function(){return this.stash[mapper]});
 	},
 	subRoutes:	function() {
-		var subRoutes = typeof arguments[0] === typeof []
+		var subRoutes = arguments[0] instanceof Array
 			? arguments[0]
 			: Array.prototype.slice.call(arguments)
 		;
@@ -176,9 +171,9 @@ Route.prototype = {
 function _setSetter(name) {
 	this[name] = function(value, other){
 		var attr = "_" + name;
-		if(typeof this[attr] != typeof [])
+		if(!(this[attr] instanceof Array))
 			this[attr] = [];
-		if(name == "handler" && typeof value == typeof "")
+		if(name == "handler" && typeof value == "string")
 			value = require(value);
 		if(other)
 			this[attr].push([value, other]);
@@ -195,7 +190,7 @@ _setSetter.call(Route.prototype, "handler");
 
 function _get_value(obj) {
 	var value;
-	if(obj.constructor === Function)
+	if(obj instanceof Function)
 		value = obj.call(this);
 	else
 		value = obj;

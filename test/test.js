@@ -309,10 +309,14 @@ describe("Router.Route" , function(){
 		it("stash2json", function(done){
 			router = new Router();
 			router.newRoute().uri("/stash2json/{test}{?array*}").stash2json();
-			runDispatcher({method: "XXX", url: "/stash2json/bla?array=a&array=b&array=c"}, {writeHead: function(){}, write: function(data){
-				data.should.be.equal("{\"test\":\"bla\",\"array\":[\"a\",\"b\",\"c\"]}");
-				done();
-			}});
+			runDispatcher(
+				{method: "XXX", url: "/stash2json/bla?array=a&array=b&array=c"},
+				{writeHead: function(){}, write: function(data){
+					if(data != undefined) {
+						data.should.be.equal("{\"test\":\"bla\",\"array\":[\"a\",\"b\",\"c\"]}");
+						done();
+					}
+				}, end: function(){}});
 		});
 	});
 });

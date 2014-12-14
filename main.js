@@ -15,7 +15,7 @@ var Dispatcher = function(port, ip) {
 };
 
 Dispatcher.importTemplates = function() {
-		debug(10, "importTemplates()");
+	debug(10, "importTemplates()");
 	var Template = require("template");
 	this.template = new Template();
 	this.template.pages("templates/*.tmpl");
@@ -163,7 +163,7 @@ Dispatcher.prototype = {
 	internalServerErrorHandler:	function(request, response) {
 		debug(10, "internalServerErrorHandler()");
 		response.writeHead(500, {'Content-Type': 'text/plain'});
-		response.end("500 internal server error");
+		response.write("500 internal server error");
 	},
 	
 	notFoundHandler:	function(request, response) {
@@ -188,7 +188,8 @@ Dispatcher.prototype = {
 				match = false;
 				loop.continue = false;
 			}
-		})
+			this.stash["header:" + head] = request.headers[head];
+		}.bind(this));
 		return match;
 	},
 
