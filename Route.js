@@ -174,19 +174,23 @@ Route.prototype = {
 };
 
 function _setSetter(name) {
-	this[name] = function(value){
+	this[name] = function(value, other){
 		var attr = "_" + name;
 		if(typeof this[attr] != typeof [])
 			this[attr] = [];
 		if(name == "handler" && typeof value == typeof "")
 			value = require(value);
-		this[attr].push(value);
+		if(other)
+			this[attr].push([value, other]);
+		else
+			this[attr].push(value);
 		return this;
 	};
 }
 
 _setSetter.call(Route.prototype, "method");
 _setSetter.call(Route.prototype, "uri");
+_setSetter.call(Route.prototype, "header");
 _setSetter.call(Route.prototype, "handler");
 
 function _get_value(obj) {

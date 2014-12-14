@@ -27,6 +27,7 @@ Dispatcher.Route = require("./Route.js");
 var uriTemplate = require("uri-templates");
 
 var _match_order = [
+	"header",
 	"uri",
 	"method",
 ];
@@ -45,6 +46,7 @@ Dispatcher.prototype = {
 			try {
 				this.dispatch(req, res);
 			} catch(err) {
+				console.error(err);
 				this.internalServerErrorHandler(req, res);
 			}
 		}.bind(this));
@@ -168,6 +170,26 @@ Dispatcher.prototype = {
 		debug(10, "notFoundHandler()");
 		response.writeHead(404, {'Content-Type': 'text/plain'});
 		response.end("404 not found");
+	},
+
+	_match_header:	function(request) {
+		debug(10, "_match_method()");
+		//console.log(this.method + " == " + request.method);
+		if(this.header === undefined) return true;
+		var match = true;
+		this.header.forEach(function loop(head){
+			if(loop.continue !== undefined && !loop.continue) return;
+			var value;
+			if(head instanceof Array) {
+				value = head[1];
+				head = head[0];
+			}
+			if(request.headers[head] === undefined || (request.headers[head] !== value && value !== undefined)) {
+				match = false;
+				loop.continue = false;
+			}
+		})
+		return match;
 	},
 
 	_match_method:	function(request) {
