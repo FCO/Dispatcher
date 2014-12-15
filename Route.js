@@ -49,14 +49,24 @@ Route.prototype = {
 		debug(10, "newRoute()");
 		return this.router.newRoute();
 	},
-	toHash:		function() {
+	toHash:		function(keys) {
 		debug(10, "toHash()");
 		var hash = {};
-		for(var key in this) {
-			if(key.substr(0, 1) === "_") {
-				hash[key.substr(1)] = this[key];
+		if(arguments[1] != undefined) {
+			keys = Array.prototype.slice.call(arguments);
+		} else if(keys !== undefined && !(keys instanceof Array)) {
+			keys = [ keys ];
+		} else if(keys === undefined) {
+			for(var key in this) {
+				if(key.substr(0, 1) === "_") {
+					hash[key.substr(1)] = this[key];
+				}
 			}
+			return hash;
 		}
+		forEach(function(key) {
+			hash[key] = this["_" + key];
+		});
 		return hash;
 	},
 	render:		function(func) {
