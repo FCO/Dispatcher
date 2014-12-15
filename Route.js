@@ -166,6 +166,19 @@ Route.prototype = {
 		}.bind(this));
 		return group;
 	},
+	log:		function(msg) {
+		this.handler(function() {
+			var date = new Date();
+			if(msg === undefined) {
+				msg = this.route.toString();
+			} else if(msg instanceof Function) {
+				msg = msg.call(this);
+			}
+			console.log("%s: %s", date.toString(), msg);
+			return true;
+		});
+		return this;
+	}
 };
 
 function _setSetter(name) {
