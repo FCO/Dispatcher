@@ -171,33 +171,56 @@ Dispatcher.prototype = {
 		response.writeHead(404, {'Content-Type': 'text/plain'});
 		response.end("404 not found");
 	},
+	_match_:	function(conf, req, cmp, stash) {
+		if(conf === undefined || conf === null || (conf instanceof Array && conf.length == 0)) return true;
+		if(!(conf instanceof Array)) conf = [ conf ];
+		var match = false;
+		conf.forEach(function(confItem){
+			if(match) return;
+			var value;
+			if(confItem instanceof Array) {
+				value		= confItem[1];
+				confItem	= confItem[0];
+			}
+			if(value == undefined) {
+				match = true;
+			} else if(req[confItem] != undefined) {
+				if(value instanceof Function) {
+					match = value.call(this, req[confItem]);
+				} else {
+					match = req[confItem] == value;
+				}
+			}
+			if(match && stash != undefined) {
+				if(stash instanceof Function)
+					stash = stash.call(this, confItem);
+				this.stash[stash] = req[confItem];
+			}
+		}.bind(this));
+		return match;
+	},
 
 	_match_header:	function(request) {
 		debug(10, "_match_method()");
-		//console.log(this.method + " == " + request.method);
-		if(this.header === undefined) return true;
-		var match = true;
-		this.header.forEach(function loop(head){
-			if(loop.continue !== undefined && !loop.continue) return;
-			var value;
-			if(head instanceof Array) {
-				value = head[1];
-				head = head[0];
-			}
-			if(request.headers[head] === undefined || (request.headers[head] !== value && value !== undefined)) {
-				match = false;
-				loop.continue = false;
-			}
-			this.stash["header:" + head] = request.headers[head];
-		}.bind(this));
-		return match;
+		return Dispatcher.prototype._match_.call(this, this.header, request.headers, function(item1, item2){
+					return item1 == item2;
+		}, function(field){return "header:" + field});
 	},
 
 	_match_method:	function(request) {
 		debug(10, "_match_method()");
 		//console.log(this.method + " == " + request.method);
 		if(this.method === undefined || this.method.length === 0) return true;
-		return this.method.indexOf(request.method) >= 0;
+		var match = false;
+		this.method.forEach(function(meth){
+			if(match) return;
+			if(meth instanceof Function) {
+				match = meth.call(this, request.method);
+			} else {
+				match = request.method == meth;
+			}
+		});
+		return match;
 	},
 
 	_match_uri:	function(request) {

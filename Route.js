@@ -64,7 +64,7 @@ Route.prototype = {
 			}
 			return hash;
 		}
-		forEach(function(key) {
+		keys.forEach(function(key) {
 			hash[key] = this["_" + key];
 		});
 		return hash;
@@ -159,6 +159,7 @@ Route.prototype = {
 			});
 		} else
 			this.render_json(function(){return this.stash[mapper]});
+		return this;
 	},
 	subRoutes:	function() {
 		var subRoutes = arguments[0] instanceof Array
