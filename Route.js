@@ -52,11 +52,13 @@ Route.prototype = {
 	toHash:		function(keys) {
 		debug(10, "toHash()");
 		var hash = {};
-		if(arguments[1] != undefined) {
+		if(arguments[1] !== undefined) {
 			keys = Array.prototype.slice.call(arguments);
-		} else if(keys !== undefined && !(keys instanceof Array)) {
+		}
+		if(keys !== undefined && !(keys instanceof Array)) {
 			keys = [ keys ];
-		} else if(keys === undefined) {
+		}
+		if(keys === undefined) {
 			for(var key in this) {
 				if(key.substr(0, 1) === "_") {
 					hash[key.substr(1)] = this[key];
@@ -66,7 +68,7 @@ Route.prototype = {
 		}
 		keys.forEach(function(key) {
 			hash[key] = this["_" + key];
-		});
+		}.bind(this));
 		return hash;
 	},
 	render:		function(func) {
