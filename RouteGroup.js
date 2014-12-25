@@ -7,9 +7,12 @@ RouteGroup.prototype = {
 	addRoute:	function(route) {
 		this.__routes__.push(route);
 	},
+	forEachRoute:	function(func) {
+		this.__routes__.forEach(func);
+	},
 };
 
-var route = new Route();
+var route = Route.prototype;
 for(var key in route) {
 	if(typeof route[key] === typeof function(){}) {
 		var group = this;

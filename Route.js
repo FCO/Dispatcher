@@ -6,6 +6,7 @@ function debug(level, msg) {
 }
 
 Route = function(router) {
+	this._id = Route.next_id++;
 	if(router !== undefined)
 		Dispatcher = router.constructor;
 	debug(10, "Route()");
@@ -20,13 +21,18 @@ Route = function(router) {
 	};
 };
 
+Route.next_id = 1;
+
 Route.prototype = {
 	clone:		function() {
-		var my_class = this.constructor;
-		var clone = new my_class(this.router);
+		var clone = new Route(this.router);
 		for(var key in this) {
 			//if(this.hasOwnProperty(key)) {
-				clone[key] = this[key];
+				if(key !== "_id")
+					if(this[key] instanceof Array)
+						clone[key] = this[key].slice();
+					else
+						clone[key] = this[key];
 			//}
 		}
 		return clone;
@@ -168,15 +174,20 @@ Route.prototype = {
 			? arguments[0]
 			: Array.prototype.slice.call(arguments)
 		;
-		var orig = this.clone();
-		var clone = this;
 		var group = new Dispatcher.RouteGroup();
-		subRoutes.forEach(function(subRoute) {
-			group.addRoute(clone);
-			if(clone !== this) this.router.registerRoute(clone);
-			subRoute.call(clone, clone);
-			clone = orig.clone();
-		}.bind(this));
+		for(var i = subRoutes.length - 1; i >= 0 ; i--) {
+			(function(){
+				var clone;
+				if(i > 0) {
+					clone = this.clone()
+					this.router.registerRoute(clone);
+				} else
+					clone = this;
+				subRoutes[i].call(clone, clone);
+				group.addRoute(clone);
+			}).call(this);
+		}
+		
 		return group;
 	},
 	log:		function(msg) {

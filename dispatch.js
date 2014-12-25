@@ -59,7 +59,7 @@ if(argv.eval !== null) {
 procs.push(function(){
 	console.log();
 	console.table("Routes", this.routes.map(function(route){
-		return route.toHash("name", "method", "uri");
+		return route.toHash("id", "name", "method", "uri");
 	}));
 	console.log();
 	return true;
