@@ -61,7 +61,6 @@ procs.push(function(){
 	console.table("Routes", this.routes.map(function(route){
 		return route.toHash("id", "name", "method", "uri");
 	}));
-	console.log();
 	return true;
 });
 if(argv["host"] !== undefined) {

@@ -24,15 +24,21 @@ Route = function(router) {
 Route.next_id = 1;
 
 Route.prototype = {
+	debugRoute:	function() {
+		console.log("DEBUG: ", this.toString(), this);
+		return this;
+	},
 	clone:		function() {
 		var clone = new Route(this.router);
 		for(var key in this) {
 			//if(this.hasOwnProperty(key)) {
-				if(key !== "_id")
-					if(this[key] instanceof Array)
+				if(key !== "_id") {
+					if(this[key] instanceof Array) {
 						clone[key] = this[key].slice();
-					else
+					} else {
 						clone[key] = this[key];
+					}
+				}
 			//}
 		}
 		return clone;
@@ -49,7 +55,7 @@ Route.prototype = {
 		var str = "";
 		if(this._name !== undefined && this._name !== null)
 			str = this._name + ": ";
-		return str + (this._method ? this._method : "NO_METHOD") + " -> " + this._uri;
+		return this._id + " => " + str + (this._method ? this._method : "NO_METHOD") + " -> " + this._uri;
 	},
 	newRoute:	function() {
 		debug(10, "newRoute()");
@@ -94,7 +100,11 @@ Route.prototype = {
 		debug(10, "Dispatcher.Route.render_json()");
 		return this.render(function(request, response){
 			response.writeHead(200, {'Content-Type': 'text/json'});
-			response.write(JSON.stringify(_get_value.call(this, obj)));
+			var json, ret = _get_value.call(this, obj);
+			if(ret !== undefined)
+				json = JSON.stringify(ret);
+				if(json)
+					response.write(json);
 			return true;
 		});
 	},
@@ -207,15 +217,19 @@ Route.prototype = {
 
 function _setSetter(name) {
 	this[name] = function(value, other){
-		var attr = "_" + name;
-		if(!(this[attr] instanceof Array))
-			this[attr] = [];
-		if(name == "handler" && typeof value == "string")
-			value = require(value);
-		if(other)
-			this[attr].push([value, other]);
-		else
-			this[attr].push(value);
+		if(value !== undefined) {
+			var attr = "_" + name;
+			if(!(this[attr] instanceof Array))
+				this[attr] = [];
+			if(name != undefined) {
+				if(name == "handler" && typeof value == "string")
+					value = require(value);
+				if(other !== undefined)
+					this[attr].push([value, other]);
+				else
+					this[attr].push(value);
+			}
+		}
 		return this;
 	};
 }

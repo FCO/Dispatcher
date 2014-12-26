@@ -86,11 +86,14 @@ Context.prototype = {
 		if(handler) {
 			setImmediate(function(){
 				debug(10, "handle() setImmediate()");
-				handler.cba(this.next_handler, this, this.route._onError)(this._request, this._response);
+				handler.cba(this.next_handler, this, this.route._onError).call(this, this._request, this._response);
 			}.bind(this));
 			return;
 		}
-		this._cb.cba(function(req, res){res.end();}, this, this.route._onError).call(this, this._request, this._response);
+		this._cb.cba(function(req, res){
+			//res.end();
+		}, this, this.route._onError)
+			.call(this, this._request, this._response);
 	},
 	call_render:	function() {
 		debug(10, "Dispatcher.Context.render()");

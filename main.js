@@ -34,6 +34,8 @@ var _match_order = [
 
 Dispatcher.logLevel = 5;
 
+Dispatcher.resource_next_id = 1;
+
 Dispatcher.prototype = {
 	port:	8080,
 	ip:	'0.0.0.0',
@@ -55,6 +57,97 @@ Dispatcher.prototype = {
 			ip	|| this.ip
 		);
 		debug(2, "Connect at http://" + (ip || this.ip) + ":" + (port || this.port));
+	},
+	default_resource: {
+		"id":	"id",
+		"get":		function(id) {
+			console.log("get:", this.id);
+		},
+		"change":	function(id, del) {
+			console.log("change:", this.id);
+		},
+		"delete":	function(id) {
+			console.log("delete:", this.id);
+		},
+		// generic
+		"list":		function() {
+			console.log("list");
+		},
+		"create":	function(data){
+			console.log("create:", data);
+		},
+	},
+	resource:		function() {
+		var id = Dispatcher.resource_next_id++;
+		var obj = {};
+		var url_specific, url_generic, obj, obj_class;
+		var args = Array.prototype.slice.call(arguments);
+		if(typeof args[args.length - 1] !== "string") obj = args.pop();
+		if(obj.url_specific === undefined && typeof args[0] == "string")
+			obj.url_specific = args.shift();
+		if(obj.url_generic === undefined && typeof args[0] == "string")
+			obj.url_generic = args.shift();
+		if(obj.name === undefined && typeof args[0] == "string")
+			obj.name = args.shift();
+		//if(obj.url_generic === undefined) {
+		//	var path = require("path");
+		//	obj.url_generic = path.resolve(url_specific + "/..");
+		//}
+		if(obj instanceof Function) {
+			obj.class = obj;
+		}
+		obj.name = obj.name || id.toString();
+		obj.__proto__ = Dispatcher.prototype.default_resource;
+		return this
+			.newRoute()
+			.log()
+			.subRoutes(
+				function(route){
+					route
+						.uri(obj.url_specific)
+						.subRoutes(
+							function(route){
+								route
+									.name("get_" + obj.name)
+									.method("GET")
+									.render_json(obj.get)
+								;
+							}, function(route) {
+								route
+									.name("change_" + obj.name)
+									.method("POST")
+									.render_json(obj.change)
+								;
+							}, function(route) {
+								route
+									.name("delete_" + obj.name)
+									.method("DELETE")
+									.render_json(obj.delete)
+								;
+							}
+						)
+					;
+				}, function(route){
+					route
+						.uri(obj.url_generic)
+						.subRoutes(
+							function(route){
+								route
+									.name("list_" + obj.name)
+									.method("GET")
+									.render_json(obj.list)
+								;
+							}, function(route) {
+								route
+									.name("create_" + obj.name)
+									.method("POST")
+									.render_json(obj.create)
+								;
+							}
+						)
+					;
+				}
+			)
 	},
 	importTemplates:	function() {
 		debug(10, "importTemplates()");
@@ -112,7 +205,6 @@ Dispatcher.prototype = {
 	match:	function(request) {
 		debug(10, "match()");
 		var route;
-		//console.log(request);
 		var matches = this._prepare_routes(this.routes);
 		_match_order.forEach(function(attr){
 			debug(10, "match() forEach()");
@@ -209,7 +301,6 @@ Dispatcher.prototype = {
 
 	_match_method:	function(request) {
 		debug(10, "_match_method()");
-		//console.log(this.method + " == " + request.method);
 		if(this.method === undefined || this.method.length === 0) return true;
 		var match = false;
 		this.method.forEach(function(meth){
@@ -225,7 +316,6 @@ Dispatcher.prototype = {
 
 	_match_uri:	function(request) {
 		debug(10, "_match_uri()");
-		//console.log(this.uri + " == " + request.url);
 		if(this.uri === undefined || this.uri.length === 0) return true;
 		var found = false;
 		(this.uri || []).forEach(function(uri){

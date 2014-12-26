@@ -15,10 +15,9 @@ RouteGroup.prototype = {
 var route = Route.prototype;
 for(var key in route) {
 	if(typeof route[key] === typeof function(){}) {
-		var group = this;
 		RouteGroup.prototype[key] = function() {
 			this.__routes__.forEach(function(route){
-				route[key].apply(this === group ? route : this , arguments);
+				route[key].apply(route, arguments);
 			}.bind(this));
 			return this;
 		};
