@@ -59,22 +59,28 @@ Dispatcher.prototype = {
 		debug(2, "Connect at http://" + (ip || this.ip) + ":" + (port || this.port));
 	},
 	default_resource: {
-		"id":	"id",
+		"id":		"id",
+		"class":	undefined,
 		"get":		function(id) {
-			console.log("get:", this.id);
+			console.log("get:", this.stash.id);
+			return {get: this.stash.id};
 		},
 		"change":	function(id, del) {
-			console.log("change:", this.id);
+			console.log("change:", this.stash.id);
+			return {change: this.stash.id};
 		},
 		"delete":	function(id) {
-			console.log("delete:", this.id);
+			console.log("delete:", this.stash.id);
+			return {"delete": this.stash.id};
 		},
 		// generic
 		"list":		function() {
 			console.log("list");
+			return {list: null};
 		},
 		"create":	function(data){
 			console.log("create:", data);
+			return {create: null};
 		},
 	},
 	resource:		function() {
@@ -100,7 +106,7 @@ Dispatcher.prototype = {
 		obj.__proto__ = Dispatcher.prototype.default_resource;
 		return this
 			.newRoute()
-			.log()
+			//.log()
 			.subRoutes(
 				function(route){
 					route
@@ -110,18 +116,30 @@ Dispatcher.prototype = {
 								route
 									.name("get_" + obj.name)
 									.method("GET")
+									.handler(function(){
+										obj.stash = this.stash;
+										return true;
+									})
 									.render_json(obj.get)
 								;
 							}, function(route) {
 								route
 									.name("change_" + obj.name)
 									.method("POST")
+									.handler(function(){
+										obj.stash = this.stash;
+										return true;
+									})
 									.render_json(obj.change)
 								;
 							}, function(route) {
 								route
 									.name("delete_" + obj.name)
 									.method("DELETE")
+									.handler(function(){
+										obj.stash = this.stash;
+										return true;
+									})
 									.render_json(obj.delete)
 								;
 							}
@@ -135,12 +153,20 @@ Dispatcher.prototype = {
 								route
 									.name("list_" + obj.name)
 									.method("GET")
+									.handler(function(){
+										obj.stash = this.stash;
+										return true;
+									})
 									.render_json(obj.list)
 								;
 							}, function(route) {
 								route
 									.name("create_" + obj.name)
 									.method("POST")
+									.handler(function(){
+										obj.stash = this.stash;
+										return true;
+									})
 									.render_json(obj.create)
 								;
 							}
