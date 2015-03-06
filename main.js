@@ -84,6 +84,7 @@ Dispatcher.prototype = {
 		},
 	},
 	resource:		function() {
+		require("./asyncForEach.js");
 		var id = Dispatcher.resource_next_id++;
 		var obj = {};
 		var url_specific, url_generic, obj, obj_class;
@@ -173,7 +174,7 @@ Dispatcher.prototype = {
 						)
 					;
 				}
-			)
+			).log()
 	},
 	importTemplates:	function() {
 		debug(10, "importTemplates()");

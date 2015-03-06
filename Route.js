@@ -191,8 +191,9 @@ Route.prototype = {
 				if(i > 0) {
 					clone = this.clone()
 					this.router.registerRoute(clone);
-				} else
+				} else {
 					clone = this;
+				}
 				subRoutes[i].call(clone, clone);
 				group.addRoute(clone);
 			}).call(this);
@@ -222,14 +223,18 @@ function _setSetter(name) {
 			if(!(this[attr] instanceof Array))
 				this[attr] = [];
 			if(name != undefined) {
-				if(name == "handler" && typeof value == "string")
+				if(name == "handler" && typeof value == "string") {
 					value = require(value);
-				if(other !== undefined)
+				}
+				if(other !== undefined) {
 					this[attr].push([value, other]);
-				else
+				} else {
+console.log("push: [%s] => [%s]", attr, value);
 					this[attr].push(value);
+				}
 			}
 		}
+console.log(this._id, attr, Array.prototype.slice.apply(arguments), ": ", this[attr]);
 		return this;
 	};
 }

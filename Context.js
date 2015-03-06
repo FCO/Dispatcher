@@ -86,7 +86,19 @@ Context.prototype = {
 		if(handler) {
 			setImmediate(function(){
 				debug(10, "handle() setImmediate()");
-				handler.cba(this.next_handler, this, this.route._onError).call(this, this._request, this._response);
+				if(handler.cba) handler.cba(this.next_handler, this, this.route._onError).call(this, this._request, this._response);
+				else {
+					if(handler instanceof Function) {
+						if(handler.call(this, this._request, this._response)) {
+							this.next_handler();
+						} else {
+							this.route._onError();
+						}
+					} else {
+						console.log("POG: ", handler);
+						this.next_handler();
+					}
+				}
 			}.bind(this));
 			return;
 		}

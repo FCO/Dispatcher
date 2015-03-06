@@ -12,9 +12,9 @@ RouteGroup.prototype = {
 	},
 };
 
-var route = Route.prototype;
-for(var key in route) {
-	if(typeof route[key] === typeof function(){}) {
+var routeobj = Route.prototype;
+for(var key in routeobj) {
+	if(typeof routeobj[key] === typeof function(){}) {
 		RouteGroup.prototype[key] = function() {
 			this.__routes__.forEach(function(route){
 				route[key].apply(route, arguments);

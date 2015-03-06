@@ -7,7 +7,7 @@ module.exports = function(dispatcher) {
 		.subRoutes(
 			function(route) {
 				route
-					.uri("/user")
+					.uri("/user/{user_id}")
 					.name("get_user")
 					.method("GET")
 					.render_text(function(){return this.stash.user_id + " was gotten\n"})
